@@ -8,21 +8,22 @@ const unsigned int SCREEN_WIDTH = 800;
 const unsigned int SCREEN_HEIGHT = 600;
 
 const std::string vertexShaderSource = "#version 330 core\n"
-"layout (location = 0) in vec3 pos;\n"
-"out vec4 vertexColor;\n"
+"layout (location = 0) in vec3 aPos;\n"
+"layout (location = 1) in vec3 aColor;\n"
+"out vec3 ourColor;\n"
 "void main()\n"
 "{\n"
-"   gl_Position = vec4(pos.x, pos.y, pos.z, 1.0);\n"
-"   vertexColor = vec4(1.0f, 0.0f, 1.0f, 1.0f);\n"
-"}";
+"   gl_Position = vec4(aPos, 1.0);\n"
+"   ourColor = aColor;\n"
+"}\0";
 
 const std::string fragmentShaderSource = "#version 330 core\n"
-"out vec4 fragColor;\n"
-"uniform vec4 vertexColor;\n"
+"out vec4 FragColor;\n"
+"in vec3 ourColor;\n"
 "void main()\n"
 "{\n"
-"   fragColor = vertexColor;\n"
-"}\n";
+"   FragColor = vec4(ourColor, 1.0f);\n"
+"}\n\0";
 
 void checkShaderCompileErrors(unsigned int shader, const std::string type)
 {
@@ -76,13 +77,30 @@ unsigned int getShaderProgram(const std::string& vertexShaderSource, const std::
     return shaderProgram;
 }
 
-struct Vertex
+struct Position
 {
     float x;
     float y;
     float z;
 
-    Vertex(float x, float y, float z) : x(x), y(y), z(z) {}
+    Position(float x, float y, float z) : x(x), y(y), z(z) {}
+};
+
+struct Color
+{
+    float r;
+    float g;
+    float b;
+
+    Color(float r, float g, float b) : r(r), g(g), b(b) {}
+};
+
+struct Vertex
+{
+    Position pos;
+    Color color;
+
+    Vertex(Position pos, Color color) : pos(pos), color(color) {}
 };
 
 void processInput(GLFWwindow* window)
@@ -136,10 +154,10 @@ int main()
 
     const size_t vertexCount = 4;
     const Vertex vertices[vertexCount] = {
-        Vertex(0.5f, 0.5f, 0.0f),
-        Vertex(0.5f, -0.5f, 0.0f),
-        Vertex(-0.5f, -0.5f, 0.0f),
-        Vertex(-0.5f,  0.5f, 0.0f)
+        Vertex(Position(0.5f, 0.5f, 0.0f), Color(1.0f, 0.0f, 0.0f)),
+        Vertex(Position(0.5f, -0.5f, 0.0f), Color(0.0f, 1.0f, 0.0f)),
+        Vertex(Position(-0.5f, -0.5f, 0.0f), Color(1.0f, 0.0f, 0.0f)),
+        Vertex(Position(-0.5f,  0.5f, 0.0f), Color(0.0f, 0.0f, 1.0f))
     };
     const size_t indexCount = 6;
     unsigned int indices[] = {
@@ -159,8 +177,11 @@ int main()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, vertexCount, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(offsetof(struct Vertex, pos)));
     glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(offsetof(struct Vertex, color)));
+    glEnableVertexAttribArray(1);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -169,6 +190,7 @@ int main()
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     unsigned int shaderProgram = getShaderProgram(vertexShaderSource, fragmentShaderSource);
+    glUseProgram(shaderProgram);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -177,16 +199,8 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(shaderProgram);
-
-        float timeValue = glfwGetTime();
-        float greenValue = sin(timeValue) / 2.0f + 0.5f;
-        int vertexColorLocation = glGetUniformLocation(shaderProgram, "vertexColor");
-        glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
-
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
-
         glBindVertexArray(0);
 
         glfwSwapBuffers(window);
