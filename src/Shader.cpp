@@ -3,6 +3,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <glm/gtc/type_ptr.hpp>
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -27,9 +29,9 @@ void Shader::use() const
     glUseProgram(m_ID);
 }
 
-void Shader::setUniform4f(const std::string& name, float v0, float v1, float v2, float v3) const
+void Shader::setMat4(const std::string& name, const glm::mat4& mat) const
 {
-    glUniform4f(glGetUniformLocation(m_ID, name.c_str()), v0, v1, v2, v3);
+    glUniformMatrix4fv(glGetUniformLocation(m_ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
 }
 
 std::string Shader::readFile(const std::string& path) const

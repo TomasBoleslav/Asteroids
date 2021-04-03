@@ -3,29 +3,15 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <glm/vec2.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include <iostream>
 #include <string>
 
 const unsigned int SCREEN_WIDTH = 800;
 const unsigned int SCREEN_HEIGHT = 600;
-
-const std::string vertexShaderSource = "#version 330 core\n"
-"layout (location = 0) in vec3 aPos;\n"
-"layout (location = 1) in vec3 aColor;\n"
-"out vec3 ourColor;\n"
-"void main()\n"
-"{\n"
-"   gl_Position = vec4(aPos, 1.0);\n"
-"   ourColor = aColor;\n"
-"}\0";
-
-const std::string fragmentShaderSource = "#version 330 core\n"
-"out vec4 FragColor;\n"
-"in vec3 ourColor;\n"
-"void main()\n"
-"{\n"
-"   FragColor = vec4(ourColor, 1.0f);\n"
-"}\n\0";
 
 struct Position
 {
@@ -148,6 +134,13 @@ int main()
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        glm::mat4 transform = glm::mat4(1.0f);
+        transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
+        transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+
+        shader.use();
+        shader.setMat4("transform", transform);
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);

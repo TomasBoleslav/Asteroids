@@ -1,6 +1,8 @@
 #ifndef SHADER_HPP
 #define SHADER_HPP
 
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <string>
 
 class Shader
@@ -8,9 +10,11 @@ class Shader
 public:
     Shader(const std::string& vertexPath, const std::string& fragmentPath);
     ~Shader();
-
+    
+    inline unsigned int getID() { return m_ID; }
     void use() const;
-    void setUniform4f(const std::string& name, float v0, float v1, float v2, float v3) const;
+    void setMat4(const std::string& name, const glm::mat4& mat) const;
+
 private:
     unsigned int m_ID;
 
