@@ -1,3 +1,5 @@
+#include "Shader.hpp"
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -24,58 +26,6 @@ const std::string fragmentShaderSource = "#version 330 core\n"
 "{\n"
 "   FragColor = vec4(ourColor, 1.0f);\n"
 "}\n\0";
-
-void checkShaderCompileErrors(unsigned int shader, const std::string type)
-{
-    const int logSize = 512;
-    int success;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        char infoLog[logSize];
-        glGetShaderInfoLog(shader, logSize, nullptr, infoLog);
-        std::cout << "Failed to compile " << type << " shader:" << std::endl << infoLog << std::endl;
-    }
-}
-
-unsigned int getShader(const std::string& shaderSource, unsigned int shaderType, const std::string& typeString)
-{
-    const char* c_str = shaderSource.c_str();
-    unsigned int shader = glCreateShader(shaderType);
-    glShaderSource(shader, 1, &c_str, nullptr);
-    glCompileShader(shader);
-    checkShaderCompileErrors(shader, typeString);
-    return shader;
-}
-
-void checkShaderProgramLinkingErrors(unsigned int shaderProgram)
-{
-    const int logSize = 512;
-    int success;
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if (!success)
-    {
-        char infoLog[logSize];
-        glGetProgramInfoLog(shaderProgram, logSize, NULL, infoLog);
-        std::cout << "Failed to link program:" << std::endl << infoLog << std::endl;
-    }
-}
-
-unsigned int getShaderProgram(const std::string& vertexShaderSource, const std::string& fragmentShaderSource)
-{
-    unsigned int vertexShader = getShader(vertexShaderSource, GL_VERTEX_SHADER, "vertex");
-    unsigned int fragmentShader = getShader(fragmentShaderSource, GL_FRAGMENT_SHADER, "fragment");
-
-    unsigned int shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-    checkShaderProgramLinkingErrors(shaderProgram);
-
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-    return shaderProgram;
-}
 
 struct Position
 {
@@ -189,8 +139,8 @@ int main()
 
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-    unsigned int shaderProgram = getShaderProgram(vertexShaderSource, fragmentShaderSource);
-    glUseProgram(shaderProgram);
+    Shader shader("res/shaders/simple.vert", "res/shaders/simple.frag");
+    shader.use();
 
     while (!glfwWindowShouldClose(window))
     {
@@ -210,7 +160,6 @@ int main()
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
-    glDeleteProgram(shaderProgram);
 
     glfwTerminate();
     return 0;

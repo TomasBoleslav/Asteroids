@@ -3,14 +3,16 @@ cmake_minimum_required(VERSION 3.12)
 project(SpaceGame)
 
 # Set output directories
+set(BIN_DIR ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BIN_DIR})
 
 # Source files
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(SOURCE_FILES
 	"main.cpp"
+	"Shader.cpp"
 	)
 list(TRANSFORM SOURCE_FILES PREPEND "${SRC_DIR}/")
 set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
@@ -20,6 +22,11 @@ set(LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PRIVATE "${INCLUDE_DIR}")
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
+
+# Copy resources
+add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_directory
+	${CMAKE_SOURCE_DIR}/res/ ${BIN_DIR}/res/)
 
 # Disable console on Windows
 #set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/ENTRY:mainCRTStartup /SUBSYSTEM:WINDOWS")
