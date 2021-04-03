@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <vector>
 
 Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath)
 {
@@ -56,8 +57,36 @@ unsigned int Shader::compileShader(const std::string& shaderSource, unsigned int
     unsigned int shader = glCreateShader(shaderType);
     glShaderSource(shader, 1, &c_str, nullptr);
     glCompileShader(shader);
-    checkShaderCompileErrors(shaderType);
+    checkShaderCompileErrors(shader, shaderType);
     return shader;
+}
+
+void Shader::checkShaderCompileErrors(unsigned int shader, unsigned int shaderType) const
+{
+    int success = 0;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+        int logLength = 0;
+        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
+
+        std::string infoLog(logLength, '\0');
+        glGetShaderInfoLog(shader, logLength, nullptr, &infoLog[0]);
+        std::cerr
+            << "Failed to compile " << getShaderTypeName(shaderType) << " shader:" << std::endl
+            << infoLog << std::endl;
+        // TODO: throw
+    }
+}
+
+std::string Shader::getShaderTypeName(unsigned int shaderType) const
+{
+    switch (shaderType)
+    {
+    case GL_VERTEX_SHADER: return "vertex"; break;
+    case GL_FRAGMENT_SHADER: return "fragment"; break;
+    }
+    return "";
 }
 
 unsigned int Shader::linkProgram(unsigned int vertexShader, unsigned int fragmentShader) const
@@ -70,42 +99,20 @@ unsigned int Shader::linkProgram(unsigned int vertexShader, unsigned int fragmen
     return shaderProgram;
 }
 
-void Shader::checkShaderCompileErrors(unsigned int shader) const
-{
-    int success;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        char infoLog[c_LogSize];
-        glGetShaderInfoLog(shader, c_LogSize, nullptr, infoLog);
-        std::cerr
-            << "Failed to compile " << getShaderType(shader) << " shader:" << std::endl
-            << infoLog << std::endl;
-        // TODO: throw
-    }
-}
-
 void Shader::checkProgramLinkingErrors(unsigned int program) const
 {
-    int success;
+    int success = 0;
     glGetProgramiv(program, GL_LINK_STATUS, &success);
     if (!success)
     {
-        char infoLog[c_LogSize];
-        glGetProgramInfoLog(program, c_LogSize, nullptr, infoLog);
+        int logLength = 0;
+        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
+
+        std::string infoLog(logLength, '\0');
+        glGetProgramInfoLog(program, logLength, nullptr, &infoLog[0]);
         std::cerr
-            << "Failed to link program:" << std::endl 
+            << "Failed to link program:" << std::endl
             << infoLog << std::endl;
         // TODO: throw
     }
-}
-
-std::string Shader::getShaderType(unsigned int shaderType) const
-{
-    switch (shaderType)
-    {
-    case GL_VERTEX_SHADER: return "vertex"; break;
-    case GL_FRAGMENT_SHADER: return "fragment"; break;
-    }
-    return "";
 }
