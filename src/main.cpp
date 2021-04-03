@@ -9,16 +9,19 @@ const unsigned int SCREEN_HEIGHT = 600;
 
 const std::string vertexShaderSource = "#version 330 core\n"
 "layout (location = 0) in vec3 pos;\n"
+"out vec4 vertexColor;\n"
 "void main()\n"
 "{\n"
 "   gl_Position = vec4(pos.x, pos.y, pos.z, 1.0);\n"
+"   vertexColor = vec4(1.0f, 0.0f, 1.0f, 1.0f);\n"
 "}";
 
 const std::string fragmentShaderSource = "#version 330 core\n"
-"out vec4 color;\n"
+"out vec4 fragColor;\n"
+"uniform vec4 vertexColor;\n"
 "void main()\n"
 "{\n"
-"   color = vec4(0.5f, 1.0f, 0.5f, 1.0f);\n"
+"   fragColor = vertexColor;\n"
 "}\n";
 
 void checkShaderCompileErrors(unsigned int shader, const std::string type)
@@ -163,7 +166,7 @@ int main()
     glBindVertexArray(0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     unsigned int shaderProgram = getShaderProgram(vertexShaderSource, fragmentShaderSource);
 
@@ -175,6 +178,12 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         glUseProgram(shaderProgram);
+
+        float timeValue = glfwGetTime();
+        float greenValue = sin(timeValue) / 2.0f + 0.5f;
+        int vertexColorLocation = glGetUniformLocation(shaderProgram, "vertexColor");
+        glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
 
