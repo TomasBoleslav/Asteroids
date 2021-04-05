@@ -1,4 +1,5 @@
 #include "Shader.hpp"
+#include "Errors.hpp"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -33,12 +34,21 @@ struct Color
     Color(float r, float g, float b) : r(r), g(g), b(b) {}
 };
 
+struct TexCoord
+{
+    float s;
+    float t;
+
+    TexCoord(float s, float t) : s(s), t(t) {}
+};
+
 struct Vertex
 {
     Position pos;
     Color color;
+    TexCoord tex;
 
-    Vertex(Position pos, Color color) : pos(pos), color(color) {}
+    Vertex(Position pos, Color color, TexCoord tex) : pos(pos), color(color), tex(tex) {}
 };
 
 void processInput(GLFWwindow* window)
@@ -82,6 +92,30 @@ GLFWwindow* initWindow()
     return window;
 }
 
+unsigned int generateTexture()
+{
+    unsigned int texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    int width, height, channelsCount;
+    unsigned char* data = stbi_load("res/images/wood.jpg", &width, &height, &channelsCount, 0);
+    if (data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data);
+    return texture;
+}
+
 int main()
 {
     GLFWwindow* window = initWindow();
@@ -92,10 +126,10 @@ int main()
 
     const size_t vertexCount = 4;
     const Vertex vertices[vertexCount] = {
-        Vertex(Position(0.5f, 0.5f, 0.0f), Color(1.0f, 0.0f, 0.0f)),
-        Vertex(Position(0.5f, -0.5f, 0.0f), Color(0.0f, 1.0f, 0.0f)),
-        Vertex(Position(-0.5f, -0.5f, 0.0f), Color(1.0f, 0.0f, 0.0f)),
-        Vertex(Position(-0.5f,  0.5f, 0.0f), Color(0.0f, 0.0f, 1.0f))
+        Vertex(Position(0.5f, 0.5f, 0.0f), Color(1.0f, 0.0f, 0.0f), TexCoord(1.0, 1.0)),
+        Vertex(Position(0.5f, -0.5f, 0.0f), Color(0.0f, 1.0f, 0.0f), TexCoord(1.0, 0.0)),
+        Vertex(Position(-0.5f, -0.5f, 0.0f), Color(1.0f, 0.0f, 0.0f), TexCoord(0.0, 0.0)),
+        Vertex(Position(-0.5f,  0.5f, 0.0f), Color(0.0f, 0.0f, 1.0f), TexCoord(0.0, 1.0))
     };
     const size_t indexCount = 6;
     unsigned int indices[] = {
@@ -121,6 +155,9 @@ int main()
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(offsetof(struct Vertex, color)));
     glEnableVertexAttribArray(1);
 
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(offsetof(struct Vertex, tex)));
+    glEnableVertexAttribArray(2);
+
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -129,6 +166,8 @@ int main()
 
     Shader shader("res/shaders/simple.vert", "res/shaders/simple.frag");
     shader.Use();
+
+    unsigned int texture = generateTexture();
 
     while (!glfwWindowShouldClose(window))
     {
@@ -144,6 +183,7 @@ int main()
         shader.Use();
         shader.SetMat4("transform", transform);
 
+        glBindTexture(GL_TEXTURE_2D, texture);
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
