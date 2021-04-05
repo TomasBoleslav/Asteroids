@@ -17,7 +17,7 @@ public:
 
 private:
     unsigned int m_ID;
-    std::unordered_map<std::string, int> m_UniformLocationsCache;
+    mutable std::unordered_map<std::string, int> m_UniformLocationsCache;
 
     std::string ReadFile(const std::string& path) const;
     unsigned int CompileShader(const std::string& shaderSource, unsigned int shaderType) const;
@@ -26,7 +26,7 @@ private:
     unsigned int LinkProgram(unsigned int vertexShader, unsigned int fragmentShader) const;
     void CheckProgramLinkingErrors(unsigned int program) const;
 
-    int GetUniformLocation(const std::string& name);
+    int GetUniformLocation(const std::string& name) const;
 };
 
 #endif

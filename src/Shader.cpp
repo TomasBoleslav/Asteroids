@@ -119,7 +119,7 @@ void Shader::CheckProgramLinkingErrors(unsigned int program) const
     }
 }
 
-int Shader::GetUniformLocation(const std::string& name)
+int Shader::GetUniformLocation(const std::string& name) const
 {
     auto it = m_UniformLocationsCache.find(name);
     if (it != m_UniformLocationsCache.end())
