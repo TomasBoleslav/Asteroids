@@ -1,4 +1,5 @@
 #include "Shader.hpp"
+
 #include "Errors.hpp"
 
 #include <glad/glad.h>
@@ -92,7 +93,7 @@ GLFWwindow* initWindow()
     return window;
 }
 
-unsigned int generateTexture()
+unsigned int generateTexture1()
 {
     unsigned int texture;
     glGenTextures(1, &texture);
@@ -102,7 +103,33 @@ unsigned int generateTexture()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     int width, height, channelsCount;
+    stbi_set_flip_vertically_on_load(true);
     unsigned char* data = stbi_load("res/images/wood.jpg", &width, &height, &channelsCount, 0);
+    if (data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data);
+    return texture;
+}
+
+unsigned int generateTexture2()
+{
+    unsigned int texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    int width, height, channelsCount;
+    stbi_set_flip_vertically_on_load(true);
+    unsigned char* data = stbi_load("res/images/mario.jpg", &width, &height, &channelsCount, 0);
     if (data)
     {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -167,7 +194,10 @@ int main()
     Shader shader("res/shaders/simple.vert", "res/shaders/simple.frag");
     shader.Use();
 
-    unsigned int texture = generateTexture();
+    unsigned int texture1 = generateTexture1();
+    unsigned int texture2 = generateTexture2();
+    shader.SetInt("texture1", 0);
+    shader.SetInt("texture2", 1);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -177,15 +207,20 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         glm::mat4 transform = glm::mat4(1.0f);
-        transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
-        transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+        //transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
+        //transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
 
         shader.Use();
         shader.SetMat4("transform", transform);
 
-        glBindTexture(GL_TEXTURE_2D, texture);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture1);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, texture2);
+
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
+        
         glBindVertexArray(0);
 
         glfwSwapBuffers(window);

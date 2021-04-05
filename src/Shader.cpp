@@ -1,5 +1,7 @@
 #include "Shader.hpp"
 
+#include "Errors.hpp"
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -15,8 +17,8 @@ Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath)
     unsigned int vertexShader = CompileShader(ReadFile(vertexPath), GL_VERTEX_SHADER);
     unsigned int fragmentShader = CompileShader(ReadFile(fragmentPath), GL_FRAGMENT_SHADER);
     m_ID = LinkProgram(vertexShader, fragmentShader);
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+    GL_CALL(glDeleteShader(vertexShader));
+    GL_CALL(glDeleteShader(fragmentShader));
 }
 
 Shader::~Shader()
@@ -32,6 +34,11 @@ void Shader::Use() const
 void Shader::SetMat4(const std::string& name, const glm::mat4& mat) const
 {
     glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(mat));
+}
+
+void Shader::SetInt(const std::string& name, int value) const
+{
+    GL_CALL(glUniform1i(GetUniformLocation(name), value));
 }
 
 std::string Shader::ReadFile(const std::string& path) const

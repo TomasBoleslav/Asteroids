@@ -13,6 +13,7 @@ set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(SOURCE_FILES
 	"main.cpp"
 	"Shader.cpp"
+	"Errors.cpp"
 	)
 list(TRANSFORM SOURCE_FILES PREPEND "${SRC_DIR}/")
 set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
