@@ -126,7 +126,7 @@ int main()
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     Shader shader("res/shaders/simple.vert", "res/shaders/simple.frag");
-    shader.use();
+    shader.Use();
 
     while (!glfwWindowShouldClose(window))
     {
@@ -139,8 +139,8 @@ int main()
         transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
         transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
 
-        shader.use();
-        shader.setMat4("transform", transform);
+        shader.Use();
+        shader.SetMat4("transform", transform);
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
