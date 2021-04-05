@@ -56,3 +56,9 @@ add_library("stb" "${STB_DIR}/src/stb_image.cpp")
 target_include_directories("stb" PRIVATE "${STB_DIR}/include")
 target_include_directories(${PROJECT_NAME} PRIVATE "${STB_DIR}/include")
 target_link_libraries(${PROJECT_NAME} "stb")
+
+# FreeType
+set(FT_DIR "${LIB_DIR}/freetype")
+add_subdirectory(${FT_DIR})
+target_include_directories(${PROJECT_NAME} PRIVATE "${FT_DIR}/include")
+target_link_libraries(${PROJECT_NAME} "freetype")
