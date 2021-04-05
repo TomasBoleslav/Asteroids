@@ -14,11 +14,11 @@
 
 Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath)
 {
-    unsigned int vertexShader = CompileShader(ReadFile(vertexPath), GL_VERTEX_SHADER);
-    unsigned int fragmentShader = CompileShader(ReadFile(fragmentPath), GL_FRAGMENT_SHADER);
+    unsigned int vertexShader = CompileShader(ReadFile(vertexPath), GL_VERTEX_SHADER, "vertex");
+    unsigned int fragmentShader = CompileShader(ReadFile(fragmentPath), GL_FRAGMENT_SHADER, "fragment");
     m_ID = LinkProgram(vertexShader, fragmentShader);
-    GL_CALL(glDeleteShader(vertexShader));
-    GL_CALL(glDeleteShader(fragmentShader));
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
 }
 
 Shader::~Shader()
@@ -38,7 +38,7 @@ void Shader::SetMat4(const std::string& name, const glm::mat4& mat) const
 
 void Shader::SetInt(const std::string& name, int value) const
 {
-    GL_CALL(glUniform1i(GetUniformLocation(name), value));
+    glUniform1i(GetUniformLocation(name), value);
 }
 
 std::string Shader::ReadFile(const std::string& path) const
@@ -60,17 +60,17 @@ std::string Shader::ReadFile(const std::string& path) const
     }
 }
 
-unsigned int Shader::CompileShader(const std::string& shaderSource, unsigned int shaderType) const
+unsigned int Shader::CompileShader(const std::string& shaderSource, unsigned int shaderType, const std::string& shaderTypeName) const
 {
     const char* c_str = shaderSource.c_str();
     unsigned int shader = glCreateShader(shaderType);
     glShaderSource(shader, 1, &c_str, nullptr);
     glCompileShader(shader);
-    CheckShaderCompileErrors(shader, shaderType);
+    CheckShaderCompileErrors(shader, shaderType, shaderTypeName);
     return shader;
 }
 
-void Shader::CheckShaderCompileErrors(unsigned int shader, unsigned int shaderType) const
+void Shader::CheckShaderCompileErrors(unsigned int shader, unsigned int shaderType, const std::string& shaderTypeName) const
 {
     int success = 0;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
@@ -82,20 +82,10 @@ void Shader::CheckShaderCompileErrors(unsigned int shader, unsigned int shaderTy
         std::string infoLog(logLength, '\0');
         glGetShaderInfoLog(shader, logLength, nullptr, &infoLog[0]);
         std::cerr
-            << "Failed to compile " << GetShaderTypeName(shaderType) << " shader:" << std::endl
+            << "Failed to compile " << shaderTypeName << " shader:" << std::endl
             << infoLog << std::endl;
         // TODO: throw
     }
-}
-
-std::string Shader::GetShaderTypeName(unsigned int shaderType) const
-{
-    switch (shaderType)
-    {
-    case GL_VERTEX_SHADER: return "vertex"; break;
-    case GL_FRAGMENT_SHADER: return "fragment"; break;
-    }
-    return "";
 }
 
 unsigned int Shader::LinkProgram(unsigned int vertexShader, unsigned int fragmentShader) const
