@@ -1,10 +1,5 @@
 #include "Errors.hpp"
 
-void err::ClearAllErrors()
-{
-	while (glGetError() != GL_NO_ERROR);
-}
-
 bool err::LogCall(const char* function, const char* file, int line)
 {
 	bool success = true;
@@ -23,8 +18,12 @@ bool err::LogCall(const char* function, const char* file, int line)
 		case GL_OUT_OF_MEMORY:                 error = "OUT_OF_MEMORY"; break;
 		case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
 		}
-		std::cerr << "[OpenGL Error] " << errorCode << " " << error << function <<
-			" File: " << file << ", Line: " << line << std::endl;
+		if (error.empty())
+		{
+			error = std::to_string(errorCode);
+		}
+		std::cerr << "[OpenGL Error] (" << error << ") " << function << ", Location: "
+			<< file << " (" << line << ")" << std::endl;
 	}
 	return success;
 }
