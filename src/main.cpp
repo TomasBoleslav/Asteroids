@@ -16,6 +16,7 @@
 
 #include <iostream>
 #include <string>
+#include <stdexcept>
 
 const unsigned int SCREEN_WIDTH = 800;
 const unsigned int SCREEN_HEIGHT = 600;
@@ -105,10 +106,8 @@ unsigned int generateTexture2()
     return texture;
 }
 
-int main()
+void test()
 {
-    glfwInit();
-
     Window::setHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     Window::setHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     Window::setHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -116,6 +115,7 @@ int main()
 #ifdef __APPLE__
     Window::setHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
+
     Window window(SCREEN_WIDTH, SCREEN_HEIGHT, "SpaceGame");
 
     const size_t vertexCount = 4;
@@ -159,12 +159,12 @@ int main()
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     Shader shader("res/shaders/simple.vert", "res/shaders/simple.frag");
-    shader.Use();
+    shader.use();
 
     unsigned int texture1 = generateTexture1();
     unsigned int texture2 = generateTexture2();
-    shader.SetInt("texture1", 0);
-    shader.SetInt("texture2", 1);
+    shader.setInt("texture1", 0);
+    shader.setInt("texture2", 1);
 
     while (!window.shouldClose())
     {
@@ -181,8 +181,8 @@ int main()
         //transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
         //transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
 
-        shader.Use();
-        shader.SetMat4("transform", transform);
+        shader.use();
+        shader.setMat4("transform", transform);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture1);
@@ -201,7 +201,32 @@ int main()
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
+}
 
+int main()
+{
+    if (glfwInit() == GLFW_FALSE)
+    {
+        std::cerr << "Failed to initialize GLFW" << std::endl;
+        return -1;
+    }
+    try
+    {
+        test();
+        // Game game;
+        // game.init();
+        // game.run();
+    }
+    catch (const std::runtime_error& e)
+    {
+        std::cerr << "Runtime error:" << std::endl << e.what() << std::endl;
+        return -2;
+    }
+    catch (const std::logic_error& e)
+    {
+        std::cerr << "Logic error:" << std::endl << e.what() << std::endl;
+        return -3;
+    }
     glfwTerminate();
     return 0;
 }
