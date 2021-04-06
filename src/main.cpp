@@ -1,5 +1,5 @@
 #include "Shader.hpp"
-
+#include "Window.hpp"
 #include "Errors.hpp"
 
 #include <glad/glad.h>
@@ -148,11 +148,16 @@ unsigned int generateTexture2()
 
 int main()
 {
-    GLFWwindow* window = initWindow();
-    if (!window)
-    {
-        return -1;
-    }
+    glfwInit();
+
+    Window::setHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    Window::setHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    Window::setHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+#ifdef __APPLE__
+    Window::setHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+    Window window(SCREEN_WIDTH, SCREEN_HEIGHT, "SpaceGame");
 
     const size_t vertexCount = 4;
     const Vertex vertices[vertexCount] = {
@@ -202,9 +207,13 @@ int main()
     shader.SetInt("texture1", 0);
     shader.SetInt("texture2", 1);
 
-    while (!glfwWindowShouldClose(window))
+    while (!window.shouldClose())
     {
-        processInput(window);
+        if (window.getKeyState(GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        {
+            window.close();
+            break;
+        }
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -223,10 +232,10 @@ int main()
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
-        
+
         glBindVertexArray(0);
 
-        glfwSwapBuffers(window);
+        window.swapBuffers();
         glfwPollEvents();
     }
 
