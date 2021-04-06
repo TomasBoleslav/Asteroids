@@ -10,120 +10,116 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <vector>
+#include <stdexcept>
 
 Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath)
 {
-    unsigned int vertexShader = CompileShader(ReadFile(vertexPath), GL_VERTEX_SHADER, "vertex");
-    unsigned int fragmentShader = CompileShader(ReadFile(fragmentPath), GL_FRAGMENT_SHADER, "fragment");
-    m_ID = LinkProgram(vertexShader, fragmentShader);
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+    unsigned int vertexShader = compileShader(readFile(vertexPath), GL_VERTEX_SHADER, "vertex");
+    unsigned int fragmentShader = compileShader(readFile(fragmentPath), GL_FRAGMENT_SHADER, "fragment");
+    m_programID = linkProgram(vertexShader, fragmentShader);
+    GL_CALL(glDeleteShader(vertexShader));
+    GL_CALL(glDeleteShader(fragmentShader));
 }
 
 Shader::~Shader()
 {
-    glDeleteProgram(m_ID);
+    GL_CALL(glDeleteProgram(m_programID));
 }
 
-void Shader::Use() const
+void Shader::use() const
 {
-    glUseProgram(m_ID);
+    GL_CALL(glUseProgram(m_programID));
 }
 
-void Shader::SetMat4(const std::string& name, const glm::mat4& mat) const
+void Shader::unuse() const
 {
-    glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(mat));
+    GL_CALL(glUseProgram(0));
 }
 
-void Shader::SetInt(const std::string& name, int value) const
+void Shader::setMat4(const std::string& name, const glm::mat4& mat) const
 {
-    glUniform1i(GetUniformLocation(name), value);
+    int location = getUniformLocation(name);
+    GL_CALL(glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(mat)));
 }
 
-std::string Shader::ReadFile(const std::string& path) const
+void Shader::setInt(const std::string& name, int value) const
+{
+    int location = getUniformLocation(name);
+    GL_CALL(glUniform1i(getUniformLocation(name), value));
+}
+
+// TODO: std::ifstream::failure (std::io_base::failure) exception may be thrown
+std::string Shader::readFile(const std::string& path) const
 {
     std::ifstream file;
     file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    try
-    {
-        file.open(path);
-        std::stringstream sstream;
-        sstream << file.rdbuf();
-        file.close();
-        return sstream.str();
-    }
-    catch (std::ifstream::failure& e)
-    {
-        std::cerr << "Could not read file " << path << std::endl;
-        return ""; // TODO: throw
-    }
+    file.open(path);
+    std::stringstream sstream;
+    sstream << file.rdbuf();
+    file.close();
+    return sstream.str();
 }
 
-unsigned int Shader::CompileShader(const std::string& shaderSource, unsigned int shaderType, const std::string& shaderTypeName) const
+unsigned int Shader::compileShader(const std::string& shaderSource, unsigned int shaderType, const std::string& shaderTypeName) const
 {
     const char* c_str = shaderSource.c_str();
-    unsigned int shader = glCreateShader(shaderType);
-    glShaderSource(shader, 1, &c_str, nullptr);
-    glCompileShader(shader);
-    CheckShaderCompileErrors(shader, shaderType, shaderTypeName);
+    GL_CALL(unsigned int shader = glCreateShader(shaderType));
+    GL_CALL(glShaderSource(shader, 1, &c_str, nullptr));
+    GL_CALL(glCompileShader(shader));
+    checkShaderCompileErrors(shader, shaderType, shaderTypeName);
     return shader;
 }
 
-void Shader::CheckShaderCompileErrors(unsigned int shader, unsigned int shaderType, const std::string& shaderTypeName) const
+void Shader::checkShaderCompileErrors(unsigned int shader, unsigned int shaderType, const std::string& shaderTypeName) const
 {
     int success = 0;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+    GL_CALL(glGetShaderiv(shader, GL_COMPILE_STATUS, &success));
     if (!success)
     {
         int logLength = 0;
-        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
+        GL_CALL(glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength));
 
         std::string infoLog(logLength, '\0');
-        glGetShaderInfoLog(shader, logLength, nullptr, &infoLog[0]);
-        std::cerr
-            << "Failed to compile " << shaderTypeName << " shader:" << std::endl
-            << infoLog << std::endl;
+        GL_CALL(glGetShaderInfoLog(shader, logLength, nullptr, &infoLog[0]));
+        throw std::runtime_error("Failed to compile " + shaderTypeName + " shader:\n" + infoLog);
         // TODO: throw
     }
 }
 
-unsigned int Shader::LinkProgram(unsigned int vertexShader, unsigned int fragmentShader) const
+unsigned int Shader::linkProgram(unsigned int vertexShader, unsigned int fragmentShader) const
 {
-    unsigned int shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-    CheckProgramLinkingErrors(shaderProgram);
+    GL_CALL(unsigned int shaderProgram = glCreateProgram());
+    GL_CALL(glAttachShader(shaderProgram, vertexShader));
+    GL_CALL(glAttachShader(shaderProgram, fragmentShader));
+    GL_CALL(glLinkProgram(shaderProgram));
+    checkProgramLinkingErrors(shaderProgram);
     return shaderProgram;
 }
 
-void Shader::CheckProgramLinkingErrors(unsigned int program) const
+void Shader::checkProgramLinkingErrors(unsigned int program) const
 {
     int success = 0;
-    glGetProgramiv(program, GL_LINK_STATUS, &success);
+    GL_CALL(glGetProgramiv(program, GL_LINK_STATUS, &success));
     if (!success)
     {
         int logLength = 0;
-        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
+        GL_CALL(glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength));
 
         std::string infoLog(logLength, '\0');
-        glGetProgramInfoLog(program, logLength, nullptr, &infoLog[0]);
-        std::cerr
-            << "Failed to link program:" << std::endl
-            << infoLog << std::endl;
+        GL_CALL(glGetProgramInfoLog(program, logLength, nullptr, &infoLog[0]));
+        throw std::runtime_error("Failed to link program:\n" + infoLog);
         // TODO: throw
     }
 }
 
-int Shader::GetUniformLocation(const std::string& name) const
+int Shader::getUniformLocation(const std::string& name) const
 {
-    auto it = m_UniformLocationsCache.find(name);
-    if (it != m_UniformLocationsCache.end())
+    auto it = m_uniformLocationsCache.find(name);
+    if (it != m_uniformLocationsCache.end())
     {
         return it->second;
     }
-    int location = glGetUniformLocation(m_ID, name.c_str());
-    m_UniformLocationsCache[name] = location;
+    GL_CALL(int location = glGetUniformLocation(m_programID, name.c_str()));
+    m_uniformLocationsCache[name] = location;
     return location;
 }
