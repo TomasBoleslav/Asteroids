@@ -8,6 +8,7 @@ Texture2D::Texture2D(unsigned int width, unsigned int height, unsigned char* dat
     : m_width(width), m_height(height), m_settings(settings)
 {
     GL_CALL(glGenTextures(1, &m_textureID));
+    GL_CALL(glActiveTexture(GL_TEXTURE0));
     GL_CALL(glBindTexture(GL_TEXTURE_2D, m_textureID));
 
     GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, settings.wrapS));
@@ -27,6 +28,7 @@ Texture2D::~Texture2D()
 
 void Texture2D::bind() const
 {
+    GL_CALL(glActiveTexture(GL_TEXTURE0));
     GL_CALL(glBindTexture(GL_TEXTURE_2D, m_textureID));
 }
 
