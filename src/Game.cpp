@@ -3,6 +3,7 @@
 #include "Vertex.hpp"
 #include "Shader.hpp"
 #include "Window.hpp"
+#include "Texture2D.hpp"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -71,10 +72,12 @@ void Game::run()
     Shader shader("res/shaders/simple.vert", "res/shaders/simple.frag");
     shader.use();
 
-    unsigned int texture1 = generateTexture1();
-    //unsigned int texture2 = generateTexture2();
-    //shader.setInt("texture1", 0);
-    //shader.setInt("texture2", 1);
+    int width, height, channelsCount;
+    stbi_set_flip_vertically_on_load(true);
+    unsigned char* data = stbi_load("res/images/wood.jpg", &width, &height, &channelsCount, 0);
+    // TODO: test if(data)
+    Texture2D texture(width, height, data);
+    stbi_image_free(data);
 
     while (!m_window.value().shouldClose())
     {
@@ -94,10 +97,7 @@ void Game::run()
         shader.use();
         shader.setMat4("transform", transform);
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture1);
-        //glActiveTexture(GL_TEXTURE1);
-        //glBindTexture(GL_TEXTURE_2D, texture2);
+        texture.bind();
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
@@ -111,54 +111,4 @@ void Game::run()
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
-}
-
-unsigned int Game::generateTexture1()
-{
-    unsigned int texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    int width, height, channelsCount;
-    stbi_set_flip_vertically_on_load(true);
-    unsigned char* data = stbi_load("res/images/wood.jpg", &width, &height, &channelsCount, 0);
-    if (data)
-    {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        throw std::runtime_error("Failed to load texture");
-    }
-    stbi_image_free(data);
-    return texture;
-}
-
-unsigned int Game::generateTexture2()
-{
-    unsigned int texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    int width, height, channelsCount;
-    stbi_set_flip_vertically_on_load(true);
-    unsigned char* data = stbi_load("res/images/mario.jpg", &width, &height, &channelsCount, 0);
-    if (data)
-    {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        throw std::runtime_error("Failed to load texture");
-    }
-    stbi_image_free(data);
-    return texture;
 }
