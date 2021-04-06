@@ -18,15 +18,13 @@ public:
     Window(unsigned int width, unsigned int height, const std::string& title);
     ~Window();
 
-    void swapBuffers();
+    void swapBuffers() const;
+    void close() const;
+    bool shouldClose() const;
 
-    inline unsigned int getWidth() { return m_width; }
-    inline unsigned int getHeight() { return m_height; }
-    int getKeyState(int key);
-
-    void close();
-    bool shouldClose();
-
+    inline unsigned int getWidth() const { return m_width; }
+    inline unsigned int getHeight() const { return m_height; }
+    int getKeyState(int key) const;
 
     static void setHint(int hint, int value);
 

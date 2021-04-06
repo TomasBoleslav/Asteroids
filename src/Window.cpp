@@ -34,24 +34,24 @@ Window::~Window()
     glfwDestroyWindow(m_window);
 }
 
-void Window::swapBuffers()
+void Window::swapBuffers() const
 {
     glfwSwapBuffers(m_window);
 }
 
-int Window::getKeyState(int key)
-{
-    return glfwGetKey(m_window, key);
-}
-
-void Window::close()
+void Window::close() const
 {
     glfwSetWindowShouldClose(m_window, GL_TRUE);
 }
 
-bool Window::shouldClose()
+bool Window::shouldClose() const
 {
     return glfwWindowShouldClose(m_window);
+}
+
+int Window::getKeyState(int key) const
+{
+    return glfwGetKey(m_window, key);
 }
 
 void Window::setHint(int hint, int value)
