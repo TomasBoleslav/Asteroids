@@ -72,9 +72,9 @@ void Game::run()
     shader.use();
 
     unsigned int texture1 = generateTexture1();
-    unsigned int texture2 = generateTexture2();
-    shader.setInt("texture1", 0);
-    shader.setInt("texture2", 1);
+    //unsigned int texture2 = generateTexture2();
+    //shader.setInt("texture1", 0);
+    //shader.setInt("texture2", 1);
 
     while (!m_window.value().shouldClose())
     {
@@ -96,8 +96,8 @@ void Game::run()
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture1);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, texture2);
+        //glActiveTexture(GL_TEXTURE1);
+        //glBindTexture(GL_TEXTURE_2D, texture2);
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
