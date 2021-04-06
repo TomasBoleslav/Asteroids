@@ -16,6 +16,7 @@ set(SOURCE_FILES
 	"Errors.cpp"
 	"Window.cpp"
 	"Game.cpp"
+	"Texture2D.cpp"
 	)
 list(TRANSFORM SOURCE_FILES PREPEND "${SRC_DIR}/")
 set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
