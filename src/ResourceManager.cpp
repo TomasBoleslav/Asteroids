@@ -9,9 +9,6 @@
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
-#include <optional>
-#include <utility>
-#include <vector>
 
 ResourceManager::ResourceManager()
 {
