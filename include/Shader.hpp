@@ -9,14 +9,14 @@
 class Shader final
 {
 public:
-    Shader() = delete;
+    Shader() noexcept;
     Shader(const Shader&) = delete;
-    Shader(Shader&&) = delete;
+    Shader(Shader&& other) noexcept;
     Shader& operator=(const Shader&) = delete;
-    Shader& operator=(Shader&&) = delete;
-
-    Shader(const std::string& vertexPath, const std::string& fragmentPath);
+    Shader& operator=(Shader&& other) noexcept;
     ~Shader();
+
+    void create(const std::string& vertexSource, const std::string& fragmentSource);
     
     void use() const;
     void unuse() const;
@@ -27,13 +27,14 @@ private:
     unsigned int m_programID;
     mutable std::unordered_map<std::string, int> m_uniformLocationsCache;
 
-    std::string readFile(const std::string& path) const;
-    unsigned int compileShader(const std::string& shaderSource, unsigned int shaderType, const std::string& shaderTypeName) const;
-    void checkShaderCompileErrors(unsigned int shader, unsigned int shaderType, const std::string& shaderTypeName) const;
-    unsigned int linkProgram(unsigned int vertexShader, unsigned int fragmentShader) const;
-    void checkProgramLinkingErrors(unsigned int program) const;
-
+    unsigned int compileShader(const std::string& source, unsigned int type, const std::string& typeName) const;
+    unsigned int linkProgram(unsigned int vertexID, unsigned int fragmentID) const;
+    void checkShaderCompileErrors(unsigned int shaderID, unsigned int type, const std::string& typeName) const;
+    void checkProgramLinkingErrors(unsigned int programID) const;
+    
     int getUniformLocation(const std::string& name) const;
+    
+    void destroy() const;
 };
 
 #endif

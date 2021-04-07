@@ -4,6 +4,7 @@
 #include "Shader.hpp"
 #include "Window.hpp"
 #include "Texture2D.hpp"
+#include "ResourceManager.hpp"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -69,15 +70,8 @@ void Game::run()
 
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-    Shader shader("res/shaders/simple.vert", "res/shaders/simple.frag");
-    shader.use();
-
-    int width, height, channelsCount;
-    stbi_set_flip_vertically_on_load(true);
-    unsigned char* data = stbi_load("res/images/wood.jpg", &width, &height, &channelsCount, 0);
-    // TODO: test if(data)
-    Texture2D texture(width, height, data);
-    stbi_image_free(data);
+    m_resources.loadShader("simple", "res/shaders/simple.vert", "res/shaders/simple.frag");
+    m_resources.loadTexture("wood", "res/images/wood.jpg");
 
     while (!m_window.value().shouldClose())
     {
@@ -94,10 +88,10 @@ void Game::run()
         //transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
         //transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
 
-        shader.use();
-        shader.setMat4("transform", transform);
+        m_resources.getShader("simple").use();
+        m_resources.getShader("simple").setMat4("transform", transform);
 
-        texture.bind();
+        m_resources.getTexture("wood").bind();
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);

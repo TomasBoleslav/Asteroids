@@ -10,18 +10,38 @@
 #include <sstream>
 #include <stdexcept>
 
-Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath)
+Shader::Shader() noexcept
+    : m_programID(0)
 {
-    unsigned int vertexShader = compileShader(readFile(vertexPath), GL_VERTEX_SHADER, "vertex");
-    unsigned int fragmentShader = compileShader(readFile(fragmentPath), GL_FRAGMENT_SHADER, "fragment");
-    m_programID = linkProgram(vertexShader, fragmentShader);
-    GL_CALL(glDeleteShader(vertexShader));
-    GL_CALL(glDeleteShader(fragmentShader));
+}
+
+Shader::Shader(Shader&& other) noexcept
+    : m_programID(other.m_programID)
+{
+    other.m_programID = 0;
+}
+
+Shader& Shader::operator=(Shader&& other) noexcept
+{
+    m_programID = other.m_programID;
+    other.m_programID = 0;
+    return *this;
+}
+
+void Shader::create(const std::string& vertexSource, const std::string& fragmentSource)
+{
+    destroy();
+    unsigned int vertexID = compileShader(vertexSource, GL_VERTEX_SHADER, "vertex");
+    unsigned int fragmentID = compileShader(fragmentSource, GL_FRAGMENT_SHADER, "fragment");
+    unsigned int programID = linkProgram(vertexID, fragmentID);
+    GL_CALL(glDeleteShader(vertexID));
+    GL_CALL(glDeleteShader(fragmentID));
+    m_programID = programID;
 }
 
 Shader::~Shader()
 {
-    GL_CALL(glDeleteProgram(m_programID));
+    destroy();
 }
 
 void Shader::use() const
@@ -46,65 +66,53 @@ void Shader::setInt(const std::string& name, int value) const
     GL_CALL(glUniform1i(getUniformLocation(name), value));
 }
 
-// TODO: std::ifstream::failure (std::io_base::failure) exception may be thrown
-std::string Shader::readFile(const std::string& path) const
+unsigned int Shader::compileShader(const std::string& source, unsigned int type, const std::string& typeName) const
 {
-    std::ifstream file;
-    file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    file.open(path);
-    std::stringstream sstream;
-    sstream << file.rdbuf();
-    file.close();
-    return sstream.str();
+    const char* c_str = source.c_str();
+    GL_CALL(unsigned int shaderID = glCreateShader(type));
+    GL_CALL(glShaderSource(shaderID, 1, &c_str, nullptr));
+    GL_CALL(glCompileShader(shaderID));
+    checkShaderCompileErrors(shaderID, type, typeName);
+    return shaderID;
 }
 
-unsigned int Shader::compileShader(const std::string& shaderSource, unsigned int shaderType, const std::string& shaderTypeName) const
+unsigned int Shader::linkProgram(unsigned int vertexID, unsigned int fragmentID) const
 {
-    const char* c_str = shaderSource.c_str();
-    GL_CALL(unsigned int shader = glCreateShader(shaderType));
-    GL_CALL(glShaderSource(shader, 1, &c_str, nullptr));
-    GL_CALL(glCompileShader(shader));
-    checkShaderCompileErrors(shader, shaderType, shaderTypeName);
-    return shader;
+    GL_CALL(unsigned int programID = glCreateProgram());
+    GL_CALL(glAttachShader(programID, vertexID));
+    GL_CALL(glAttachShader(programID, fragmentID));
+    GL_CALL(glLinkProgram(programID));
+    checkProgramLinkingErrors(programID);
+    return programID;
 }
 
-void Shader::checkShaderCompileErrors(unsigned int shader, unsigned int shaderType, const std::string& shaderTypeName) const
+void Shader::checkShaderCompileErrors(unsigned int shaderID, unsigned int type, const std::string& typeName) const
 {
     int success = 0;
-    GL_CALL(glGetShaderiv(shader, GL_COMPILE_STATUS, &success));
+    GL_CALL(glGetShaderiv(shaderID, GL_COMPILE_STATUS, &success));
     if (!success)
     {
         int logLength = 0;
-        GL_CALL(glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength));
+        GL_CALL(glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &logLength));
 
         std::string infoLog(logLength, '\0');
-        GL_CALL(glGetShaderInfoLog(shader, logLength, nullptr, &infoLog[0]));
-        throw std::runtime_error("Failed to compile " + shaderTypeName + " shader:\n" + infoLog);
+        GL_CALL(glGetShaderInfoLog(shaderID, logLength, nullptr, &infoLog[0]));
+        throw std::runtime_error("Failed to compile " + typeName + " shader:\n" + infoLog);
         // TODO: throw
     }
 }
 
-unsigned int Shader::linkProgram(unsigned int vertexShader, unsigned int fragmentShader) const
-{
-    GL_CALL(unsigned int shaderProgram = glCreateProgram());
-    GL_CALL(glAttachShader(shaderProgram, vertexShader));
-    GL_CALL(glAttachShader(shaderProgram, fragmentShader));
-    GL_CALL(glLinkProgram(shaderProgram));
-    checkProgramLinkingErrors(shaderProgram);
-    return shaderProgram;
-}
-
-void Shader::checkProgramLinkingErrors(unsigned int program) const
+void Shader::checkProgramLinkingErrors(unsigned int programID) const
 {
     int success = 0;
-    GL_CALL(glGetProgramiv(program, GL_LINK_STATUS, &success));
+    GL_CALL(glGetProgramiv(programID, GL_LINK_STATUS, &success));
     if (!success)
     {
         int logLength = 0;
-        GL_CALL(glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength));
+        GL_CALL(glGetProgramiv(programID, GL_INFO_LOG_LENGTH, &logLength));
 
         std::string infoLog(logLength, '\0');
-        GL_CALL(glGetProgramInfoLog(program, logLength, nullptr, &infoLog[0]));
+        GL_CALL(glGetProgramInfoLog(programID, logLength, nullptr, &infoLog[0]));
         throw std::runtime_error("Failed to link program:\n" + infoLog);
         // TODO: throw
     }
@@ -120,4 +128,12 @@ int Shader::getUniformLocation(const std::string& name) const
     GL_CALL(int location = glGetUniformLocation(m_programID, name.c_str()));
     m_uniformLocationsCache[name] = location;
     return location;
+}
+
+void Shader::destroy() const
+{
+    if (m_programID != 0)
+    {
+        GL_CALL(glDeleteProgram(m_programID));
+    }
 }

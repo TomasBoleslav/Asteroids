@@ -17,15 +17,15 @@ public:
         unsigned int filterMag;
     };
 
-    Texture2D() = delete;
+    Texture2D() noexcept;
     Texture2D(const Texture2D&) = delete;
-    Texture2D(Texture2D&&) = delete;
+    Texture2D(Texture2D&& other) noexcept;
     Texture2D& operator=(const Texture2D&) = delete;
-    Texture2D& operator=(Texture2D&&) = delete;
-
-    Texture2D(unsigned int width, unsigned int height, unsigned char* data);
-    Texture2D(unsigned int width, unsigned int height, unsigned char* data, const Settings& settings);
+    Texture2D& operator=(Texture2D&& other) noexcept;
     ~Texture2D();
+
+    void create(unsigned int width, unsigned int height, unsigned char* data);
+    void create(unsigned int width, unsigned int height, unsigned char* data, const Settings& settings);
 
     void bind() const;
     void unbind() const;
@@ -37,7 +37,8 @@ private:
     unsigned int m_width, m_height;
     Settings m_settings;
 
-    unsigned int generate(unsigned int width, unsigned int height, unsigned char* data, const Settings& settings) const;
+    unsigned int generateTexture(unsigned int width, unsigned int height, unsigned char* data, const Settings& settings) const;
+    void destroy() const;
 };
 
 #endif

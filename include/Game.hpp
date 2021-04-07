@@ -2,6 +2,7 @@
 #define GAME_HPP
 
 #include "Window.hpp"
+#include "ResourceManager.hpp"
 
 #include <optional>
 
@@ -15,10 +16,9 @@ public:
 private:
     const size_t SCR_WIDTH = 800;
     const size_t SCR_HEIGHT = 600;
-    std::optional<Window> m_window;
 
-    unsigned int generateTexture1();
-    unsigned int generateTexture2();
+    std::optional<Window> m_window;
+    ResourceManager m_resources;
 };
 
 #endif
