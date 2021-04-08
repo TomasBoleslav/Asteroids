@@ -14,7 +14,7 @@ Shader::Shader(const std::string& vertexSource, const std::string& fragmentSourc
 {
     unsigned int vertexID = compileShader(vertexSource, GL_VERTEX_SHADER, "vertex");
     unsigned int fragmentID = compileShader(fragmentSource, GL_FRAGMENT_SHADER, "fragment");
-    unsigned int m_programID = linkProgram(vertexID, fragmentID);
+    m_programID = linkProgram(vertexID, fragmentID);
     GL_CALL(glDeleteShader(vertexID));
     GL_CALL(glDeleteShader(fragmentID));
 }
