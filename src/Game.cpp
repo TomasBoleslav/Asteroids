@@ -17,6 +17,10 @@
 
 Game::Game()
 {
+}
+
+void Game::init()
+{
     Window::setHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     Window::setHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     Window::setHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -26,10 +30,14 @@ Game::Game()
 #endif
 
     m_window.emplace(SCR_WIDTH, SCR_HEIGHT, "SpaceGame");
+
+    // TODO: create game objects
 }
 
 void Game::run()
 {
+    init();
+
     const size_t vertexCount = 4;
     const Vertex vertices[vertexCount] = {
         Vertex(Position(0.5f, 0.5f, 0.0f), Color(1.0f, 0.0f, 0.0f), TexCoord(1.0, 1.0)),

@@ -19,6 +19,8 @@ private:
 
     std::optional<Window> m_window;
     ResourceManager m_resources;
+    
+    void init();
 };
 
 #endif
