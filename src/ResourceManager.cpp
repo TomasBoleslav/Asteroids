@@ -27,9 +27,7 @@ void ResourceManager::loadShader(const std::string& name, const std::string& ver
     }
     std::string vertexSource = readFile(vertexPath);
     std::string fragmentSource = readFile(fragmentPath);
-    Shader shader;
-    shader.create(vertexSource, fragmentSource);
-    m_shaders[name] = std::move(shader);
+    m_shaders[name] = std::make_shared<Shader>(vertexSource, fragmentSource);
 }
 
 void ResourceManager::loadTexture(const std::string& name, const std::string& path)
@@ -47,13 +45,11 @@ void ResourceManager::loadTexture(const std::string& name, const std::string& pa
         throw std::ios_base::failure("Failed to load texture at location '" + path +"'.");
         // TODO: throw
     }
-    Texture2D texture;
-    texture.create(width, height, data);
-    m_textures[name] = std::move(texture);
+    m_textures[name] = std::make_shared<Texture2D>(width, height, data);
     stbi_image_free(data);
 }
 
-const Shader& ResourceManager::getShader(const std::string& name) const
+std::shared_ptr<Shader> ResourceManager::getShader(const std::string& name) const
 {
     auto it = m_shaders.find(name);
     if (it == m_shaders.end())
@@ -64,7 +60,7 @@ const Shader& ResourceManager::getShader(const std::string& name) const
     return it->second;
 }
 
-const Texture2D& ResourceManager::getTexture(const std::string& name) const
+std::shared_ptr<Texture2D> ResourceManager::getTexture(const std::string& name) const
 {
     auto it = m_textures.find(name);
     if (it == m_textures.end())
@@ -73,12 +69,6 @@ const Texture2D& ResourceManager::getTexture(const std::string& name) const
         // TODO: throw correct type
     }
     return it->second;
-}
-
-void ResourceManager::clear()
-{
-    m_shaders.clear();
-    m_textures.clear();
 }
 
 std::string ResourceManager::readFile(const std::string& path) const

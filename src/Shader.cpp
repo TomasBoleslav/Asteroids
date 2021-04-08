@@ -10,38 +10,18 @@
 #include <sstream>
 #include <stdexcept>
 
-Shader::Shader() noexcept
-    : m_programID(0)
+Shader::Shader(const std::string& vertexSource, const std::string& fragmentSource)
 {
-}
-
-Shader::Shader(Shader&& other) noexcept
-    : m_programID(other.m_programID)
-{
-    other.m_programID = 0;
-}
-
-Shader& Shader::operator=(Shader&& other) noexcept
-{
-    m_programID = other.m_programID;
-    other.m_programID = 0;
-    return *this;
-}
-
-void Shader::create(const std::string& vertexSource, const std::string& fragmentSource)
-{
-    destroy();
     unsigned int vertexID = compileShader(vertexSource, GL_VERTEX_SHADER, "vertex");
     unsigned int fragmentID = compileShader(fragmentSource, GL_FRAGMENT_SHADER, "fragment");
-    unsigned int programID = linkProgram(vertexID, fragmentID);
+    unsigned int m_programID = linkProgram(vertexID, fragmentID);
     GL_CALL(glDeleteShader(vertexID));
     GL_CALL(glDeleteShader(fragmentID));
-    m_programID = programID;
 }
 
 Shader::~Shader()
 {
-    destroy();
+    GL_CALL(glDeleteProgram(m_programID));
 }
 
 void Shader::use() const
@@ -128,12 +108,4 @@ int Shader::getUniformLocation(const std::string& name) const
     GL_CALL(int location = glGetUniformLocation(m_programID, name.c_str()));
     m_uniformLocationsCache[name] = location;
     return location;
-}
-
-void Shader::destroy() const
-{
-    if (m_programID != 0)
-    {
-        GL_CALL(glDeleteProgram(m_programID));
-    }
 }

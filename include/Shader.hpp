@@ -9,14 +9,14 @@
 class Shader final
 {
 public:
-    Shader() noexcept;
+    Shader() = delete;
     Shader(const Shader&) = delete;
-    Shader(Shader&& other) noexcept;
+    Shader(Shader&& other) = delete;
     Shader& operator=(const Shader&) = delete;
-    Shader& operator=(Shader&& other) noexcept;
-    ~Shader();
+    Shader& operator=(Shader&& other) = delete;
 
-    void create(const std::string& vertexSource, const std::string& fragmentSource);
+    Shader(const std::string& vertexSource, const std::string& fragmentSource);
+    ~Shader();
     
     void use() const;
     void unuse() const;
@@ -33,8 +33,6 @@ private:
     void checkProgramLinkingErrors(unsigned int programID) const;
     
     int getUniformLocation(const std::string& name) const;
-    
-    void destroy() const;
 };
 
 #endif

@@ -88,10 +88,10 @@ void Game::run()
         //transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
         //transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
 
-        m_resources.getShader("simple").use();
-        m_resources.getShader("simple").setMat4("transform", transform);
+        m_resources.getShader("simple")->use();
+        m_resources.getShader("simple")->setMat4("transform", transform);
 
-        m_resources.getTexture("wood").bind();
+        m_resources.getTexture("wood")->bind();
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);

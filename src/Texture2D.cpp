@@ -4,53 +4,21 @@
 
 #include <glad/glad.h>
 
-Texture2D::Texture2D() noexcept
-    : m_textureID(0), m_width(0), m_height(0), m_settings(Settings())
+Texture2D::Texture2D(unsigned int width, unsigned int height, unsigned char* data)
+    : m_width(width), m_height(height), m_settings(Settings())
 {
+    m_textureID = generateTexture(width, height, data, m_settings);
 }
 
-Texture2D::Texture2D(Texture2D&& other) noexcept
-    : m_textureID(other.m_textureID), m_width(other.m_width), m_height(other.m_height), m_settings(other.m_settings)
+Texture2D::Texture2D(unsigned int width, unsigned int height, unsigned char* data, const Settings& settings)
+    : m_width(width), m_height(height), m_settings(settings)
 {
-    other.m_textureID = 0;
-    other.m_width = 0;
-    other.m_height = 0;
-}
-
-Texture2D& Texture2D::operator=(Texture2D&& other) noexcept
-{
-    m_textureID = other.m_textureID;
-    m_width = other.m_width;
-    m_height = other.m_height;
-    m_settings = other.m_settings;
-
-    other.m_textureID = 0;
-    other.m_width = 0;
-    other.m_height = 0;
-
-    return *this;
+    m_textureID = generateTexture(width, height, data, settings);
 }
 
 Texture2D::~Texture2D()
 {
-    destroy();
-}
-
-void Texture2D::create(unsigned int width, unsigned int height, unsigned char* data)
-{
-    destroy();
-    m_textureID = generateTexture(width, height, data, m_settings);
-    m_width = width;
-    m_height = height;
-}
-
-void Texture2D::create(unsigned int width, unsigned int height, unsigned char* data, const Settings& settings)
-{
-    destroy();
-    m_textureID = generateTexture(width, height, data, settings);
-    m_width = width;
-    m_height = height;
-    m_settings = settings;
+    GL_CALL(glDeleteTextures(1, &m_textureID));
 }
 
 void Texture2D::bind() const
@@ -80,14 +48,6 @@ unsigned int Texture2D::generateTexture(unsigned int width, unsigned int height,
 
     GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
     return textureID;
-}
-
-void Texture2D::destroy() const
-{
-    if (m_textureID != 0)
-    {
-        GL_CALL(glDeleteTextures(1, &m_textureID));
-    }
 }
 
 Texture2D::Settings::Settings()

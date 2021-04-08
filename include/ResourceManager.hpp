@@ -6,6 +6,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <memory>
 
 class ResourceManager final
 {
@@ -17,13 +18,12 @@ public:
     void loadShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath);
     void loadTexture(const std::string& name, const std::string& path);
     
-    const Shader& getShader(const std::string& name) const;
-    const Texture2D& getTexture(const std::string& name) const;
+    std::shared_ptr<Shader> getShader(const std::string& name) const;
+    std::shared_ptr<Texture2D> getTexture(const std::string& name) const;
 
-    void clear();
 private:
-    std::unordered_map<std::string, Shader> m_shaders;
-    std::unordered_map<std::string, Texture2D> m_textures;
+    std::unordered_map<std::string, std::shared_ptr<Shader>> m_shaders;
+    std::unordered_map<std::string, std::shared_ptr<Texture2D>> m_textures;
 
     // TODO: std::ifstream::failure (std::io_base::failure) exception may be thrown
     std::string readFile(const std::string& path) const;
