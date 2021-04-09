@@ -15,6 +15,11 @@
 #include <optional>
 #include <stdexcept>
 #include <array>
+#include <iostream>
+
+const double Game::UPDATES_PER_SEC = 60.0;
+const double Game::UPDATE_INTERVAL = 1 / UPDATES_PER_SEC;
+
 
 Game::Game()
 {
@@ -42,12 +47,10 @@ void Game::createWindow()
     Window::setHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     Window::setHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     Window::setHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
 #ifdef __APPLE__
     Window::setHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
-
-    m_window.emplace(SCR_WIDTH, SCR_HEIGHT, "SpaceGame");
+    m_window = std::make_unique<Window>(SCR_WIDTH, SCR_HEIGHT, "SpaceGame");
 }
 
 void Game::loadResources()
@@ -59,21 +62,46 @@ void Game::loadResources()
 void Game::run()
 {
     init();
-    while (!m_window.value().shouldClose())
+    gameLoop();
+}
+
+void Game::gameLoop()
+{
+    double lastUpdated = glfwGetTime();
+    while (!m_window->shouldClose())
     {
-        if (m_window.value().getKeyState(GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        processInput();
+        double currentTime = glfwGetTime();
+        while (lastUpdated + UPDATE_INTERVAL <= currentTime)
         {
-            m_window.value().close();
-            break;
+            lastUpdated += UPDATE_INTERVAL;
+            update(UPDATE_INTERVAL);
         }
-
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        rectangle.draw(renderer, m_resources.getShader("simple"));
-
-        m_window.value().swapBuffers();
+        render();
         glfwPollEvents();
-
     }
+}
+
+void Game::processInput()
+{
+    if (m_window->getKeyState(GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    {
+        m_window->close();
+    }
+}
+
+void Game::render()
+{
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f); // TODO: nebude potreba kdyz budu kreslit texturu pres cele pozadi?
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    rectangle.draw(renderer, m_resources.getShader("simple"));
+
+    m_window->swapBuffers();
+}
+
+
+void Game::update(double dt)
+{
+    
 }

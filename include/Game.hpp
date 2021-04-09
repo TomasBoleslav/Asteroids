@@ -6,7 +6,7 @@
 #include "Renderer.hpp"
 #include "GameObject.hpp"
 
-#include <optional>
+#include <memory>
 
 class Game
 {
@@ -18,8 +18,10 @@ public:
 private:
     static const unsigned int SCR_WIDTH = 800;
     static const unsigned int SCR_HEIGHT = 600;
+    static const double UPDATES_PER_SEC;
+    static const double UPDATE_INTERVAL;
 
-    std::optional<Window> m_window;
+    std::unique_ptr<Window> m_window;
     ResourceManager m_resources;
     Renderer renderer;
     GameObject rectangle;
@@ -27,11 +29,10 @@ private:
     void init();
     void createWindow();
     void loadResources();
-
-    unsigned int createVAO();
-    void drawQuad(const std::shared_ptr<Shader>& shader, const std::shared_ptr<Texture2D>& texture,
-        glm::vec2 position, glm::vec2 size, float rotation, glm::vec3 color) const;
-    void drawGameObject(const std::shared_ptr<Shader>& shader, const GameObject& object) const;
+    void gameLoop();
+    void processInput();
+    void update(double dt);
+    void render();
 };
 
 #endif
