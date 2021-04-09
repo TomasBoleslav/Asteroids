@@ -9,6 +9,7 @@
 #include <glm/mat4x4.hpp>
 
 #include <memory>
+#include <array>
 
 class Renderer
 {
@@ -19,8 +20,16 @@ public:
     void drawQuad(const std::shared_ptr<Shader>& shader, const std::shared_ptr<Texture2D>& texture,
         glm::vec2 position, glm::vec2 size, float rotation, glm::vec3 color) const;
 private:
+    struct Vertex
+    {
+        glm::vec2 position;
+        glm::vec2 texCoord;
+    };
+
     static const unsigned int VERTEX_COUNT = 6;
     unsigned int m_quadVAO;
+
+    std::array<Vertex, Renderer::VERTEX_COUNT> getVertices();
 };
 
 

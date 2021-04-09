@@ -14,12 +14,6 @@
 
 #include <array>
 
-struct Vertex
-{
-    glm::vec2 position;
-    glm::vec2 texCoord;
-};
-
 // TODO: create white texture so that color can be used (or not?)
 Renderer::Renderer() : m_quadVAO(0)
 {    
@@ -27,15 +21,7 @@ Renderer::Renderer() : m_quadVAO(0)
 
 void Renderer::init()
 {
-    std::array<Vertex, VERTEX_COUNT> vertices = {
-        glm::vec2(0.0f, 1.0f), glm::vec2(0.0f, 1.0f),
-        glm::vec2(1.0f, 0.0f), glm::vec2(1.0f, 0.0f),
-        glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f),
-
-        glm::vec2(0.0f, 1.0f), glm::vec2(0.0f, 1.0f),
-        glm::vec2(1.0f, 1.0f), glm::vec2(1.0f, 1.0f),
-        glm::vec2(1.0f, 0.0f), glm::vec2(1.0f, 0.0f)
-    };
+    std::array<Vertex, VERTEX_COUNT> vertices = getVertices();
     unsigned int VBO;
     GL_CALL(glGenVertexArrays(1, &m_quadVAO));
     GL_CALL(glGenBuffers(1, &VBO));
@@ -72,4 +58,17 @@ void Renderer::drawQuad(const std::shared_ptr<Shader>& shader, const std::shared
     GL_CALL(glBindVertexArray(m_quadVAO));
     GL_CALL(glDrawArrays(GL_TRIANGLES, 0, VERTEX_COUNT));
     GL_CALL(glBindVertexArray(0));
+}
+
+std::array<Renderer::Vertex, Renderer::VERTEX_COUNT> Renderer::getVertices()
+{
+    return std::array<Vertex, VERTEX_COUNT> {
+        glm::vec2(0.0f, 1.0f), glm::vec2(0.0f, 1.0f),
+        glm::vec2(1.0f, 0.0f), glm::vec2(1.0f, 0.0f),
+        glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f),
+
+        glm::vec2(0.0f, 1.0f), glm::vec2(0.0f, 1.0f),
+        glm::vec2(1.0f, 1.0f), glm::vec2(1.0f, 1.0f),
+        glm::vec2(1.0f, 0.0f), glm::vec2(1.0f, 0.0f)
+    };
 }

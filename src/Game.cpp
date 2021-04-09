@@ -54,7 +54,6 @@ void Game::loadResources()
 {
     m_resources.loadShader("simple", "res/shaders/simple.vert", "res/shaders/simple.frag");
     m_resources.loadTexture("wood", "res/images/wood.jpg");
-    m_resources.loadTexture("black", "res/images/black.jpg");
 }
 
 void Game::run()
