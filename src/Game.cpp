@@ -84,7 +84,7 @@ void Game::gameLoop()
 
 void Game::processInput()
 {
-    if (m_window->getKeyState(GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    if (m_window->isKeyPressed(GLFW_KEY_ESCAPE))
     {
         m_window->setClose();
     }
