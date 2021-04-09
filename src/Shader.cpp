@@ -40,10 +40,16 @@ void Shader::setMat4(const std::string& name, const glm::mat4& mat) const
     GL_CALL(glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(mat)));
 }
 
+void Shader::setVec3(const std::string& name, const glm::vec3& vec) const
+{
+    int location = getUniformLocation(name);
+    GL_CALL(glUniform3f(location, vec.x, vec.y, vec.z));
+}
+
 void Shader::setInt(const std::string& name, int value) const
 {
     int location = getUniformLocation(name);
-    GL_CALL(glUniform1i(getUniformLocation(name), value));
+    GL_CALL(glUniform1i(location, value));
 }
 
 unsigned int Shader::compileShader(const std::string& source, unsigned int type, const std::string& typeName) const
