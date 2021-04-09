@@ -19,19 +19,14 @@ public:
     ~Window();
 
     void swapBuffers() const;
-    void close() const;
+    void setClose() const;
     bool shouldClose() const;
-
-    inline unsigned int getWidth() const { return m_width; }
-    inline unsigned int getHeight() const { return m_height; }
     int getKeyState(int key) const;
 
     static void setHint(int hint, int value);
 
 private:
     GLFWwindow* m_window;
-    unsigned int m_width;
-    unsigned int m_height;
 };
 
 

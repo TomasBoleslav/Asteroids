@@ -12,7 +12,7 @@ void frameBufferSizeCallback(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
-Window::Window(unsigned int width, unsigned int height, const std::string& title) : m_width(width), m_height(height)
+Window::Window(unsigned int width, unsigned int height, const std::string& title)
 {
     m_window = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
     if (!m_window)
@@ -39,7 +39,7 @@ void Window::swapBuffers() const
     glfwSwapBuffers(m_window);
 }
 
-void Window::close() const
+void Window::setClose() const
 {
     glfwSetWindowShouldClose(m_window, GL_TRUE);
 }
