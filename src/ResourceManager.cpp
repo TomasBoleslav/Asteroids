@@ -20,7 +20,7 @@ ResourceManager::ResourceManager(const std::string& shaderListPath, const std::s
 
 void ResourceManager::loadShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath)
 {
-    if (m_textures.find(name) != m_textures.end())
+    if (m_shaders.find(name) != m_shaders.end())
     {
         throw std::runtime_error("Shader with name '" + name + "' already exists.");
         // TODO: throw
