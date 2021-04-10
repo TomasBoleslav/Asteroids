@@ -16,11 +16,6 @@ Texture2D::Texture2D(unsigned int width, unsigned int height, unsigned char* dat
     m_textureID = generateTexture(width, height, data, settings);
 }
 
-Texture2D::~Texture2D()
-{
-    GL_CALL(glDeleteTextures(1, &m_textureID));
-}
-
 void Texture2D::bind() const
 {
     GL_CALL(glActiveTexture(GL_TEXTURE0));
@@ -30,6 +25,16 @@ void Texture2D::bind() const
 void Texture2D::unbind() const
 {
     GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
+}
+
+unsigned int Texture2D::getID() const
+{
+    return m_textureID;
+}
+
+const Texture2D::Settings& Texture2D::getSettings() const
+{
+    return m_settings;
 }
 
 unsigned int Texture2D::generateTexture(unsigned int width, unsigned int height, unsigned char* data, const Settings& settings) const

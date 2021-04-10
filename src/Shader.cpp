@@ -5,7 +5,6 @@
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
@@ -17,11 +16,6 @@ Shader::Shader(const std::string& vertexSource, const std::string& fragmentSourc
     m_programID = linkProgram(vertexID, fragmentID);
     GL_CALL(glDeleteShader(vertexID));
     GL_CALL(glDeleteShader(fragmentID));
-}
-
-Shader::~Shader()
-{
-    GL_CALL(glDeleteProgram(m_programID));
 }
 
 void Shader::use() const
@@ -36,20 +30,25 @@ void Shader::unuse() const
 
 void Shader::setMat4(const std::string& name, const glm::mat4& mat) const
 {
-    int location = getUniformLocation(name);
+    GL_CALL(int location = glGetUniformLocation(m_programID, name.c_str()));
     GL_CALL(glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(mat)));
 }
 
 void Shader::setVec3(const std::string& name, const glm::vec3& vec) const
 {
-    int location = getUniformLocation(name);
+    GL_CALL(int location = glGetUniformLocation(m_programID, name.c_str()));
     GL_CALL(glUniform3f(location, vec.x, vec.y, vec.z));
 }
 
 void Shader::setInt(const std::string& name, int value) const
 {
-    int location = getUniformLocation(name);
+    GL_CALL(int location = glGetUniformLocation(m_programID, name.c_str()));
     GL_CALL(glUniform1i(location, value));
+}
+
+unsigned int Shader::getID() const
+{
+    return m_programID;
 }
 
 unsigned int Shader::compileShader(const std::string& source, unsigned int type, const std::string& typeName) const
@@ -102,16 +101,4 @@ void Shader::checkProgramLinkingErrors(unsigned int programID) const
         throw std::runtime_error("Failed to link program:\n" + infoLog);
         // TODO: throw
     }
-}
-
-int Shader::getUniformLocation(const std::string& name) const
-{
-    auto it = m_uniformLocationsCache.find(name);
-    if (it != m_uniformLocationsCache.end())
-    {
-        return it->second;
-    }
-    GL_CALL(int location = glGetUniformLocation(m_programID, name.c_str()));
-    m_uniformLocationsCache[name] = location;
-    return location;
 }

@@ -1,15 +1,8 @@
 #include "Window.hpp"
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include "Input.hpp"
 
-#include <string>
-#include <exception>
 #include <stdexcept>
-#include <cstddef>
-#include <array>
-
-std::array<bool, Window::KEY_COUNT> Window::s_isKeyPressed;
 
 void frameBufferSizeCallback(GLFWwindow* window, int width, int height)
 {
@@ -18,22 +11,22 @@ void frameBufferSizeCallback(GLFWwindow* window, int width, int height)
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
-    if (0 <= key && key < Window::KEY_COUNT)
+    if (0 <= key && key < Input::KEY_COUNT)
     {
         if (action == GLFW_PRESS)
         {
-            Window::s_isKeyPressed[key] = true;
+            Input::s_isKeyPressed[key] = true;
         }
         else if (action == GLFW_RELEASE)
         {
-            Window::s_isKeyPressed[key] = false;
+            Input::s_isKeyPressed[key] = false;
         }
     }
 }
 
 Window::Window(unsigned int width, unsigned int height, const std::string& title)
 {
-    initKeyArray();
+    Input::reset();
     m_window = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
     if (!m_window)
     {
@@ -55,21 +48,12 @@ Window::~Window()
     glfwDestroyWindow(m_window);
 }
 
-bool Window::isKeyPressed(std::size_t key) const
-{
-    if (key >= KEY_COUNT)
-    {
-        throw std::logic_error("Key code '" + std::to_string(key) + "' is not valid.");
-    }
-    return s_isKeyPressed[key];
-}
-
 void Window::swapBuffers() const
 {
     glfwSwapBuffers(m_window);
 }
 
-void Window::setClose() const
+void Window::setToClose() const
 {
     glfwSetWindowShouldClose(m_window, GL_TRUE);
 }
@@ -82,12 +66,4 @@ bool Window::shouldClose() const
 void Window::setHint(int hint, int value)
 {
     glfwWindowHint(hint, value);
-}
-
-void Window::initKeyArray()
-{
-    for (std::size_t i = 0; i < KEY_COUNT; i++)
-    {
-        s_isKeyPressed[i] = false;
-    }
 }

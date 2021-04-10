@@ -16,6 +16,7 @@ class Renderer
 public:
     Renderer();
 
+    // TODO: predej resource manager, kam pridas bilou texturu
     void init(); // init buffers
     void drawQuad(const std::shared_ptr<Shader>& shader, const std::shared_ptr<Texture2D>& texture,
         glm::vec2 position, glm::vec2 size, float rotation, glm::vec3 color) const;

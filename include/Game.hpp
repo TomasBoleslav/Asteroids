@@ -8,10 +8,11 @@
 
 #include <memory>
 
-class Game
+class Game final
 {
 public:
     Game();
+    ~Game();
 
     void run();
 
@@ -22,9 +23,9 @@ private:
     static const double UPDATE_INTERVAL;
 
     std::unique_ptr<Window> m_window;
+
     ResourceManager m_resources;
     Renderer renderer;
-    GameObject rectangle;
 
     void init();
     void createWindow();

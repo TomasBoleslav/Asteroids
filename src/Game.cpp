@@ -2,9 +2,8 @@
 
 #include "Errors.hpp"
 #include "Shader.hpp"
-#include "Window.hpp"
 #include "Texture2D.hpp"
-#include "ResourceManager.hpp"
+#include "Input.hpp"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -12,17 +11,18 @@
 #include <glm/mat4x4.hpp>
 #include <glm/vec2.hpp>
 
-#include <optional>
 #include <stdexcept>
-#include <array>
-#include <iostream>
 
 const double Game::UPDATES_PER_SEC = 60.0;
 const double Game::UPDATE_INTERVAL = 1 / UPDATES_PER_SEC;
 
-
 Game::Game()
 {
+}
+
+Game::~Game()
+{
+    m_resources.clear();
 }
 
 void Game::init()
@@ -34,11 +34,6 @@ void Game::init()
     m_resources.getShader("simple")->use();
     m_resources.getShader("simple")->setMat4("u_projection", projection);
 
-    rectangle.texture = m_resources.getTexture("wood");
-    rectangle.position = glm::vec2(100.0, 100.0);
-    rectangle.color = glm::vec3(0.0, 1.0, 1.0);
-    rectangle.rotation = 0.0;
-    rectangle.size = glm::vec2(100.0, 200.0);
     renderer.init();
 }
 
@@ -84,9 +79,9 @@ void Game::gameLoop()
 
 void Game::processInput()
 {
-    if (m_window->isKeyPressed(GLFW_KEY_ESCAPE))
+    if (Input::isKeyPressed(GLFW_KEY_ESCAPE))
     {
-        m_window->setClose();
+        m_window->setToClose();
     }
 }
 
@@ -95,7 +90,6 @@ void Game::render()
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f); // TODO: nebude potreba kdyz budu kreslit texturu pres cele pozadi?
     glClear(GL_COLOR_BUFFER_BIT);
 
-    rectangle.draw(renderer, m_resources.getShader("simple"));
 
     m_window->swapBuffers();
 }

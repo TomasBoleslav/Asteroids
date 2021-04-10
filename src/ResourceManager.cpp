@@ -2,8 +2,11 @@
 
 #include "Shader.hpp"
 #include "Texture2D.hpp"
+#include "Errors.hpp"
 
 #include <stb_image.h>
+#include <glad/glad.h>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <string>
 #include <fstream>
@@ -49,6 +52,16 @@ void ResourceManager::loadTexture(const std::string& name, const std::string& pa
     stbi_image_free(data);
 }
 
+void ResourceManager::addTexture(const std::string& name, std::shared_ptr<Texture2D> texture)
+{
+    if (m_textures.find(name) != m_textures.end())
+    {
+        throw std::runtime_error("Texture with name '" + name + "' already exists.");
+        // TODO: throw
+    }
+    m_textures[name] = texture;
+}
+
 std::shared_ptr<Shader> ResourceManager::getShader(const std::string& name) const
 {
     auto it = m_shaders.find(name);
@@ -80,4 +93,19 @@ std::string ResourceManager::readFile(const std::string& path) const
     sstream << file.rdbuf();
     file.close();
     return sstream.str();
+}
+
+void ResourceManager::clear()
+{
+    for (auto&& pair : m_shaders)
+    {
+        GL_CALL(glDeleteProgram(pair.second->getID()));
+    }
+    for (auto&& pair : m_textures)
+    {
+        unsigned int textureID = pair.second->getID();
+        GL_CALL(glDeleteTextures(1, &textureID));
+    }
+    m_shaders.clear();
+    m_textures.clear();
 }
