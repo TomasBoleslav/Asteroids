@@ -20,6 +20,7 @@ set(SOURCE_FILES
 	"ResourceManager.cpp"
 	"Renderer.cpp"
 	"GameObject.cpp"
+	"Input.cpp"
 	)
 list(TRANSFORM SOURCE_FILES PREPEND "${SRC_DIR}/")
 set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
