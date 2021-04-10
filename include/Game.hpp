@@ -5,6 +5,7 @@
 #include "ResourceManager.hpp"
 #include "Renderer.hpp"
 #include "GameObject.hpp"
+#include "Player.hpp"
 
 #include <memory>
 
@@ -25,14 +26,16 @@ private:
     std::unique_ptr<Window> m_window;
 
     ResourceManager m_resources;
-    Renderer renderer;
+    Renderer m_renderer;
+
+    Player m_player;
 
     void init();
     void createWindow();
     void loadResources();
     void gameLoop();
     void processInput();
-    void update(double dt);
+    void update(double deltaTime);
     void render();
 };
 

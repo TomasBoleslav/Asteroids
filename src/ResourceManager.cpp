@@ -33,7 +33,7 @@ void ResourceManager::loadShader(const std::string& name, const std::string& ver
     m_shaders[name] = std::make_shared<Shader>(vertexSource, fragmentSource);
 }
 
-void ResourceManager::loadTexture(const std::string& name, const std::string& path)
+void ResourceManager::loadTexture(const std::string& name, const std::string& path, bool alpha)
 {
     if (m_textures.find(name) != m_textures.end())
     {
@@ -48,7 +48,13 @@ void ResourceManager::loadTexture(const std::string& name, const std::string& pa
         throw std::ios_base::failure("Failed to load texture at location '" + path +"'.");
         // TODO: throw
     }
-    m_textures[name] = std::make_shared<Texture2D>(width, height, data);
+    Texture2D::Settings settings;
+    if (alpha)
+    {
+        settings.internalFormat = GL_RGBA;
+        settings.format = GL_RGBA;
+    }
+    m_textures[name] = std::make_shared<Texture2D>(width, height, data, settings);
     stbi_image_free(data);
 }
 

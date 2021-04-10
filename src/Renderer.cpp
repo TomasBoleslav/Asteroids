@@ -83,6 +83,6 @@ std::shared_ptr<Texture2D> Renderer::createWhiteTexture() const
     settings.format = GL_RGBA;
     settings.wrapS = settings.wrapT = GL_LINEAR;
     settings.filterMin = settings.filterMag = GL_CLAMP_TO_EDGE;
-    uint32_t color = 0xffffffff;
+    unsigned char color = 0xffffffff;
     return std::make_shared<Texture2D>(1, 1, &color);
 }

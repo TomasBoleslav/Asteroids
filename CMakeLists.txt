@@ -20,6 +20,7 @@ set(SOURCE_FILES
 	"ResourceManager.cpp"
 	"Renderer.cpp"
 	"GameObject.cpp"
+	"Player.cpp"
 	"Input.cpp"
 	)
 list(TRANSFORM SOURCE_FILES PREPEND "${SRC_DIR}/")

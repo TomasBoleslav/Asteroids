@@ -34,7 +34,12 @@ void Game::init()
     m_resources.getShader("simple")->use();
     m_resources.getShader("simple")->setMat4("u_projection", projection);
 
-    renderer.init();
+    m_renderer.init(m_resources);
+
+    m_player.texture = m_resources.getTexture("ship");
+    m_player.size = glm::vec2(64.0f, 64.0f);
+    m_player.position = glm::vec2(200.0f, 200.0f);
+    m_player.bounds.push_back(glm::vec2(1.0));
 }
 
 void Game::createWindow()
@@ -51,7 +56,8 @@ void Game::createWindow()
 void Game::loadResources()
 {
     m_resources.loadShader("simple", "res/shaders/simple.vert", "res/shaders/simple.frag");
-    m_resources.loadTexture("wood", "res/images/wood.jpg");
+    m_resources.loadTexture("wood", "res/images/wood.jpg", false);
+    m_resources.loadTexture("ship", "res/images/wood.jpg", false);
 }
 
 void Game::run()
@@ -82,7 +88,10 @@ void Game::processInput()
     if (Input::isKeyPressed(GLFW_KEY_ESCAPE))
     {
         m_window->setToClose();
+        return;
     }
+    m_player.processInput();
+    
 }
 
 void Game::render()
@@ -90,12 +99,22 @@ void Game::render()
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f); // TODO: nebude potreba kdyz budu kreslit texturu pres cele pozadi?
     glClear(GL_COLOR_BUFFER_BIT);
 
-
+    m_player.draw(m_renderer, m_resources.getShader("simple"));
+    /*
+    m_resources.getShader("simple")->use();
+    glm::vec2 position = glm::vec2(100.0f, 100.0f);
+    glm::vec2 size = glm::vec2(100.0f, 100.0f);
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(position, 0.0f));
+    model = glm::scale(model, glm::vec3(size, 1.0f));
+    m_resources.getShader("simple")->setMat4("u_model", model);
+    m_renderer.drawQuad(m_resources.getShader("simple"), m_resources.getTexture("wood"), glm::vec3(1.0));
+    */
     m_window->swapBuffers();
 }
 
 
-void Game::update(double dt)
+void Game::update(double deltaTime)
 {
-    
+    m_player.update(deltaTime);
 }

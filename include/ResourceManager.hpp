@@ -18,7 +18,7 @@ public:
     // TODO: destructor - clear resources or not?
 
     void loadShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath);
-    void loadTexture(const std::string& name, const std::string& path);
+    void loadTexture(const std::string& name, const std::string& path, bool alpha);
     void addTexture(const std::string& name, std::shared_ptr<Texture2D> texture);
     
     std::shared_ptr<Shader> getShader(const std::string& name) const;
