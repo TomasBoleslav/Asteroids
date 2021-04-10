@@ -13,54 +13,37 @@
 #include <glm/trigonometric.hpp>
 
 #include <array>
+#include <cstdint>
 
-// TODO: create white texture so that color can be used (or not?)
-Renderer::Renderer() : m_quadVAO(0)
-{    
+Renderer::Renderer() : m_quadVAO(0), m_whiteTexture(nullptr)
+{
 }
 
-void Renderer::init()
+void Renderer::init(ResourceManager& resources)
 {
     std::array<Vertex, VERTEX_COUNT> vertices = getVertices();
-    unsigned int VBO;
-    GL_CALL(glGenVertexArrays(1, &m_quadVAO));
-    GL_CALL(glGenBuffers(1, &VBO));
-
-    GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, VBO));
-    GL_CALL(glBufferData(GL_ARRAY_BUFFER, VERTEX_COUNT * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW));
-
-    GL_CALL(glBindVertexArray(m_quadVAO));
-    GL_CALL(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(offsetof(struct Vertex, position))));
-    GL_CALL(glEnableVertexAttribArray(0));
-    GL_CALL(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(offsetof(struct Vertex, texCoord))));
-    GL_CALL(glEnableVertexAttribArray(1));
-
-    GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
-    GL_CALL(glBindVertexArray(0));
+    m_quadVAO = createQuadVAO(vertices.data());
+    m_whiteTexture = createWhiteTexture();
+    resources.addTexture("white", m_whiteTexture);
 }
 
-void Renderer::drawQuad(const std::shared_ptr<Shader>& shader, const std::shared_ptr<Texture2D>& texture,
-    glm::vec2 position, glm::vec2 size, float rotation, glm::vec3 color) const
+void Renderer::drawQuad(const std::shared_ptr<Shader>& shader, const std::shared_ptr<Texture2D>& texture, glm::vec3 color) const
 {
-    shader->use();
-    glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(position, 0.0f));
-    model = glm::translate(model, glm::vec3(0.5f * size.x, 0.5f * size.y, 0.0f));
-    model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 0.0f, 1.0f));
-    model = glm::translate(model, glm::vec3(-0.5f * size.x, -0.5f * size.y, 0.0f));
-    model = glm::scale(model, glm::vec3(size, 1.0f));
-
-    shader->setMat4("u_model", model);
+    if (texture)
+    {
+        texture->bind();
+    }
+    else
+    {
+        m_whiteTexture->bind();
+    }
     shader->setVec3("u_color", color);
-
-    texture->bind();
-
     GL_CALL(glBindVertexArray(m_quadVAO));
     GL_CALL(glDrawArrays(GL_TRIANGLES, 0, VERTEX_COUNT));
     GL_CALL(glBindVertexArray(0));
 }
 
-std::array<Renderer::Vertex, Renderer::VERTEX_COUNT> Renderer::getVertices()
+std::array<Renderer::Vertex, Renderer::VERTEX_COUNT> Renderer::getVertices() const
 {
     return std::array<Vertex, VERTEX_COUNT> {
         glm::vec2(0.0f, 1.0f), glm::vec2(0.0f, 1.0f),
@@ -71,4 +54,35 @@ std::array<Renderer::Vertex, Renderer::VERTEX_COUNT> Renderer::getVertices()
         glm::vec2(1.0f, 1.0f), glm::vec2(1.0f, 1.0f),
         glm::vec2(1.0f, 0.0f), glm::vec2(1.0f, 0.0f)
     };
+}
+
+unsigned int Renderer::createQuadVAO(const void* data) const
+{
+    unsigned int VAO, VBO;
+    GL_CALL(glGenVertexArrays(1, &VAO));
+    GL_CALL(glGenBuffers(1, &VBO));
+
+    GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, VBO));
+    GL_CALL(glBufferData(GL_ARRAY_BUFFER, VERTEX_COUNT * sizeof(Vertex), data, GL_STATIC_DRAW));
+
+    GL_CALL(glBindVertexArray(VAO));
+    GL_CALL(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(offsetof(struct Vertex, position))));
+    GL_CALL(glEnableVertexAttribArray(0));
+    GL_CALL(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(offsetof(struct Vertex, texCoord))));
+    GL_CALL(glEnableVertexAttribArray(1));
+
+    GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+    GL_CALL(glBindVertexArray(0));
+    return VAO;
+}
+
+std::shared_ptr<Texture2D> Renderer::createWhiteTexture() const
+{
+    Texture2D::Settings settings;
+    settings.internalFormat = GL_RGBA8;
+    settings.format = GL_RGBA;
+    settings.wrapS = settings.wrapT = GL_LINEAR;
+    settings.filterMin = settings.filterMag = GL_CLAMP_TO_EDGE;
+    uint32_t color = 0xffffffff;
+    return std::make_shared<Texture2D>(1, 1, &color);
 }
