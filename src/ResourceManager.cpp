@@ -37,11 +37,10 @@ void ResourceManager::loadTexture(const std::string& name, const std::string& pa
 {
     if (m_textures.find(name) != m_textures.end())
     {
-        throw std::runtime_error("Texture with name '" + name + "' already exists.");
+        throw std::logic_error("Texture with name '" + name + "' already exists.");
         // TODO: throw
     }
     int width, height, channelsCount;
-    stbi_set_flip_vertically_on_load(true);
     unsigned char* data = stbi_load(path.c_str(), &width, &height, &channelsCount, 0);
     if (!data)
     {

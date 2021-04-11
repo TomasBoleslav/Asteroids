@@ -51,13 +51,16 @@ void Game::createWindow()
     Window::setHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
     m_window = std::make_unique<Window>(SCR_WIDTH, SCR_HEIGHT, "SpaceGame");
+    glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void Game::loadResources()
 {
     m_resources.loadShader("simple", "res/shaders/simple.vert", "res/shaders/simple.frag");
     m_resources.loadTexture("wood", "res/images/wood.jpg", false);
-    m_resources.loadTexture("ship", "res/images/wood.jpg", false);
+    m_resources.loadTexture("ship", "res/images/ship.png", true);
 }
 
 void Game::run()
