@@ -39,13 +39,24 @@ void Game::init()
     m_player.texture = m_resources.getTexture("ship");
     m_player.size = glm::vec2(64.0f, 64.0f);
     m_player.position = glm::vec2(200.0f, 200.0f);
-    m_player.bounds.push_back(glm::vec2(1.0));
+    m_player.bounds.push_back(glm::vec2(0.0f, 1.0f)); // TODO: recursive add via forwarding
+    m_player.bounds.push_back(glm::vec2(1.0f, 1.0f));
+    m_player.bounds.push_back(glm::vec2(0.5f, 0.0f));
 
-    m_asteroid.texture = m_resources.getTexture("wood");
-    m_asteroid.size = glm::vec2(64.0f, 64.0f);
-    m_asteroid.position = glm::vec2(0.0f);
-    m_asteroid.velocity = 30.0f * glm::vec2(1.0, 1.0);
-    m_asteroid.angularVelocity = 30.0f;
+    for (size_t i = 0; i < 10; i++)
+    {
+        std::shared_ptr<Asteroid> asteroid = std::make_shared<Asteroid>();
+        asteroid->texture = m_resources.getTexture("wood");
+        asteroid->size = glm::vec2(64.0f, 64.0f);
+        asteroid->position = (float)i * glm::vec2(50.0f, 80.0f);
+        asteroid->velocity = 0.0f * glm::vec2(0.0, 1.0);
+        asteroid->angularVelocity = 30.0f;
+        asteroid->bounds.push_back(glm::vec2(0.0f, 0.0f)); // TODO: recursive add via forwarding
+        asteroid->bounds.push_back(glm::vec2(1.0f, 0.0f));
+        asteroid->bounds.push_back(glm::vec2(1.0f, 1.0f));
+        asteroid->bounds.push_back(glm::vec2(0.0f, 1.0f));
+        m_asteroids.push_back(asteroid);
+    }
 }
 
 void Game::createWindow()
@@ -84,11 +95,12 @@ void Game::gameLoop()
         double currentTime = glfwGetTime();
         while (lastUpdated + UPDATE_INTERVAL <= currentTime)
         {
+            checkForCollisions();
             lastUpdated += UPDATE_INTERVAL;
             update(UPDATE_INTERVAL);
         }
         render();
-        glfwPollEvents();
+        glfwPollEvents();   // TODO: add to window
     }
 }
 
@@ -109,7 +121,10 @@ void Game::render()
     glClear(GL_COLOR_BUFFER_BIT);
 
     m_player.draw(m_renderer, m_resources.getShader("simple"));
-    m_asteroid.draw(m_renderer, m_resources.getShader("simple"));
+    for (auto&& asteroid : m_asteroids)
+    {
+        asteroid->draw(m_renderer, m_resources.getShader("simple"));
+    }
 
     m_window->swapBuffers();
 }
@@ -118,5 +133,26 @@ void Game::render()
 void Game::update(double deltaTime)
 {
     m_player.update(deltaTime);
-    m_asteroid.update(deltaTime);
+    for (auto&& asteroid : m_asteroids)
+    {
+        asteroid->update(deltaTime);
+    }
+
+    //checkForCollisions();
+}
+
+void Game::checkForCollisions()
+{
+    std::size_t i = 0;
+    while (i < m_asteroids.size())
+    {
+        if (m_player.collidesWith(m_asteroids[i]))
+        {
+            m_asteroids.erase(m_asteroids.begin() + i);
+        }
+        else
+        {
+            ++i;
+        }
+    }
 }

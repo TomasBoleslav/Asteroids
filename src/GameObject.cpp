@@ -1,6 +1,7 @@
 #include "GameObject.hpp"
 
 #include "Renderer.hpp"
+#include "Geometry.hpp"
 
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
@@ -27,14 +28,24 @@ bool GameObject::collidesWith(const std::shared_ptr<GameObject>& other) const
 {
     auto bounds1 = applyModelOnBounds();
     auto bounds2 = other->applyModelOnBounds();
+    return geom::doPolygonsIntersect(bounds1, bounds2);
+    /*/
     for (auto&& point : bounds1)
     {
-        if (pointInPolygon(bounds2, point))
+        if (geom::pointInPolygon(bounds2, point))
+        {
+            return true;
+        }
+    }
+    for (auto&& point : bounds2)
+    {
+        if (geom::pointInPolygon(bounds1, point))
         {
             return true;
         }
     }
     return false;
+    /**/
 }
 
 glm::mat4 GameObject::getModelMatrix() const
@@ -53,9 +64,10 @@ std::vector<glm::vec2> GameObject::applyModelOnBounds() const
     std::vector<glm::vec2> transformedBounds;
     transformedBounds.reserve(bounds.size());
     glm::mat4 model = getModelMatrix();
-    for (auto&& point : bounds)
+    for (const auto& point : bounds)
     {
-        glm::vec2 transformedPoint = model * glm::vec4(point, 0.0, 0.0);
+        glm::vec4 appliedModel = model * glm::vec4(point, 0.0, 1.0);
+        glm::vec2 transformedPoint = glm::vec2(appliedModel);
         transformedBounds.push_back(transformedPoint);
     }
     return transformedBounds;

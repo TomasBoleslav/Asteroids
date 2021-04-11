@@ -10,6 +10,7 @@ class Player : public GameObject
 public:
     float forceValue;
     float friction;
+    float bulletsPerSecond;
 
     Player();
     //Player(std::shared_ptr<Texture2D> texture, const std::vector<glm::vec2>& bounds, float force);

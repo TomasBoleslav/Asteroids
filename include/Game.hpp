@@ -9,6 +9,7 @@
 #include "Asteroid.hpp"
 
 #include <memory>
+#include <vector>
 
 class Game final
 {
@@ -30,7 +31,7 @@ private:
     Renderer m_renderer;
 
     Player m_player;
-    Asteroid m_asteroid;
+    std::vector<std::shared_ptr<Asteroid>> m_asteroids;
 
     void init();
     void createWindow();
@@ -39,6 +40,7 @@ private:
     void processInput();
     void update(double deltaTime);
     void render();
+    void checkForCollisions();
 };
 
 #endif
