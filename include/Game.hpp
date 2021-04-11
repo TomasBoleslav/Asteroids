@@ -6,6 +6,7 @@
 #include "Renderer.hpp"
 #include "GameObject.hpp"
 #include "Player.hpp"
+#include "Asteroid.hpp"
 
 #include <memory>
 
@@ -29,6 +30,7 @@ private:
     Renderer m_renderer;
 
     Player m_player;
+    Asteroid m_asteroid;
 
     void init();
     void createWindow();

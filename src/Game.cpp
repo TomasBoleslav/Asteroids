@@ -40,6 +40,12 @@ void Game::init()
     m_player.size = glm::vec2(64.0f, 64.0f);
     m_player.position = glm::vec2(200.0f, 200.0f);
     m_player.bounds.push_back(glm::vec2(1.0));
+
+    m_asteroid.texture = m_resources.getTexture("wood");
+    m_asteroid.size = glm::vec2(64.0f, 64.0f);
+    m_asteroid.position = glm::vec2(0.0f);
+    m_asteroid.velocity = 30.0f * glm::vec2(1.0, 1.0);
+    m_asteroid.angularVelocity = 30.0f;
 }
 
 void Game::createWindow()
@@ -103,16 +109,8 @@ void Game::render()
     glClear(GL_COLOR_BUFFER_BIT);
 
     m_player.draw(m_renderer, m_resources.getShader("simple"));
-    /*
-    m_resources.getShader("simple")->use();
-    glm::vec2 position = glm::vec2(100.0f, 100.0f);
-    glm::vec2 size = glm::vec2(100.0f, 100.0f);
-    glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(position, 0.0f));
-    model = glm::scale(model, glm::vec3(size, 1.0f));
-    m_resources.getShader("simple")->setMat4("u_model", model);
-    m_renderer.drawQuad(m_resources.getShader("simple"), m_resources.getTexture("wood"), glm::vec3(1.0));
-    */
+    m_asteroid.draw(m_renderer, m_resources.getShader("simple"));
+
     m_window->swapBuffers();
 }
 
@@ -120,4 +118,5 @@ void Game::render()
 void Game::update(double deltaTime)
 {
     m_player.update(deltaTime);
+    m_asteroid.update(deltaTime);
 }
