@@ -1,14 +1,13 @@
 #include "Geometry.hpp"
 
-#include <cstdlib>
-#include <glm/trigonometric.hpp>
-#include <glm/geometric.hpp> 
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <algorithm>
 
 bool geom::pointInPolygon(const std::vector<glm::vec2>& polygon, glm::vec2 point)
 {
     bool inside = false;
-    float x = point.x;  // ray from (x,y) to right (x as horizontal axis)
+    float x = point.x;  // ray from (x,y) to right (x is horizontal axis)
     float y = point.y;
     const float epsilon = 0.01f;
     glm::vec2 prev = polygon.back();
@@ -35,49 +34,14 @@ bool geom::pointInPolygon(const std::vector<glm::vec2>& polygon, glm::vec2 point
             {
                 upper.y += epsilon;
             }
-            // nepouzivam upper a lower
             if ((x - upper.x) * (upper.y - lower.y) < (upper.x - lower.x) * (upper.y - y))
             {
                 inside = !inside;   // ray intersects with line segment
             }
         }
-        /*
-        if ((curr.y <= y && y < prev.y) ||
-            (prev.y <= y && y < curr.y))                                    // prev and curr on different sides of half-plane
-        {
-            if ((x - curr.x) * (prev.y - curr.y) < (prev.x - curr.x) * (y - curr.y))
-            {
-            inside = !inside;   // ray intersects with line segment
-            }
-        }*/
         prev = curr;
     }
     return inside;
-}
-
-bool geom::pointInPolygon2(const std::vector<glm::vec2>& polygon, glm::vec2 point)
-{
-    glm::atan(glm::vec2());
-    bool inside = false;
-
-    return inside;
-}
-
-float geom::cross(glm::vec2 v1, glm::vec2 v2)
-{
-    return v1.x * v2.y - v1.y * v2.x;
-}
-
-
-bool geom::polygonsIntersect(const std::vector<glm::vec2>& polygon1, const std::vector<glm::vec2>& polygon2)
-{
-    return false;
-}
-
-bool geom::segmentsIntersect(glm::vec2 a1, glm::vec2 b1, glm::vec2 a2, glm::vec2 b2)
-{
-    // nevyhoda - musim jeste zkontrolovat, jestli neni 1 uvnitr druheho
-    return false;
 }
 
 bool geom::onSegment(glm::vec2 p, glm::vec2 q, glm::vec2 r)
@@ -154,4 +118,15 @@ bool geom::doPolygonsIntersect(const std::vector<glm::vec2>& polygon1, const std
         previous1 = current1;
     }
     return false;
+}
+
+glm::mat4 geom::getModelMatrix(glm::vec2 position, glm::vec2 size, float rotation)
+{
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(position, 0.0f));
+    model = glm::translate(model, glm::vec3(0.5f * size.x, 0.5f * size.y, 0.0f));
+    model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 0.0f, 1.0f));
+    model = glm::translate(model, glm::vec3(-0.5f * size.x, -0.5f * size.y, 0.0f));
+    model = glm::scale(model, glm::vec3(size, 1.0f));
+    return model;
 }

@@ -22,25 +22,30 @@ public:
 private:
     static const unsigned int SCR_WIDTH = 800;
     static const unsigned int SCR_HEIGHT = 600;
-    static const double UPDATES_PER_SEC;
-    static const double UPDATE_INTERVAL;
+    static const float UPDATES_PER_SEC;
+    static const float UPDATE_INTERVAL;
 
     std::unique_ptr<Window> m_window;
-
-    ResourceManager m_resources;
     Renderer m_renderer;
 
     Player m_player;
     std::vector<std::shared_ptr<Asteroid>> m_asteroids;
+    std::vector<std::shared_ptr<Bullet>> m_bullets;
 
     void init();
     void createWindow();
     void loadResources();
+    void setCommonUniforms();
+    void initPlayer();
+    void resetGame();
+
     void gameLoop();
     void processInput();
-    void update(double deltaTime);
+    void update(float deltaTime);
     void render();
     void checkForCollisions();
+    void createAsteroid();
+    bool objectLeftWindow(std::shared_ptr<GameObject> gameObject);
 };
 
 #endif

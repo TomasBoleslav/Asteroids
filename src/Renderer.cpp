@@ -3,41 +3,44 @@
 #include "Errors.hpp"
 #include "Shader.hpp"
 #include "Texture2D.hpp"
+#include "Geometry.hpp"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
-#include <glm/mat4x4.hpp>
-#include <glm/ext/matrix_transform.hpp>
-#include <glm/trigonometric.hpp>
 
 #include <array>
-#include <cstdint>
 
-Renderer::Renderer() : m_quadVAO(0), m_whiteTexture(nullptr)
+Renderer::Renderer() : m_quadVAO(0), m_shader(nullptr)
 {
 }
 
-void Renderer::init(ResourceManager& resources)
+void Renderer::init(std::shared_ptr<Shader> shader)
 {
+    m_shader = shader;
     std::array<Vertex, VERTEX_COUNT> vertices = getVertices();
     m_quadVAO = createQuadVAO(vertices.data());
-    m_whiteTexture = createWhiteTexture();
-    resources.addTexture("white", m_whiteTexture);
+    if (!ResourceManager::getTexture("white"))
+    {
+        auto whiteTexture = createWhiteTexture();
+        ResourceManager::addTexture("white", whiteTexture);
+    }
 }
 
-void Renderer::drawQuad(const std::shared_ptr<Shader>& shader, const std::shared_ptr<Texture2D>& texture, glm::vec3 color) const
+void Renderer::drawQuad(const std::shared_ptr<Texture2D>& texture, glm::vec2 position, glm::vec2 size,
+    float rotation, glm::vec3 color) const
 {
+    m_shader->use();
+    glm::mat4 model = geom::getModelMatrix(position, size, rotation);
+    m_shader->setMat4("u_model", model);
+    m_shader->setVec3("u_color", color);
     if (texture)
     {
         texture->bind();
     }
     else
     {
-        m_whiteTexture->bind();
+        ResourceManager::getTexture("white")->bind();
     }
-    shader->setVec3("u_color", color);
     GL_CALL(glBindVertexArray(m_quadVAO));
     GL_CALL(glDrawArrays(GL_TRIANGLES, 0, VERTEX_COUNT));
     GL_CALL(glBindVertexArray(0));
@@ -81,8 +84,8 @@ std::shared_ptr<Texture2D> Renderer::createWhiteTexture() const
     Texture2D::Settings settings;
     settings.internalFormat = GL_RGBA8;
     settings.format = GL_RGBA;
-    settings.wrapS = settings.wrapT = GL_LINEAR;
-    settings.filterMin = settings.filterMag = GL_CLAMP_TO_EDGE;
-    unsigned char color = 0xffffffff;
-    return std::make_shared<Texture2D>(1, 1, &color);
+    settings.wrapS = settings.wrapT = GL_REPEAT;
+    settings.filterMin = settings.filterMag = GL_NEAREST;
+    unsigned char data[4] = { 255, 255, 255, 255 };
+    return std::make_shared<Texture2D>(1, 1, data);
 }

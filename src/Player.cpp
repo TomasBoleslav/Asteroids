@@ -1,6 +1,7 @@
 #include "Player.hpp"
 
 #include "Input.hpp"
+#include "Geometry.hpp"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -9,9 +10,7 @@
 #include <glm/trigonometric.hpp>
 #include <glm/gtc/constants.hpp>
 
-const glm::vec2 Player::zeroVector = glm::vec2(0.0f);
-
-Player::Player() : currentVelocity(zeroVector), direction(zeroVector)
+Player::Player() : shootDelay(1.0f), currentVelocity(0.0f), direction(0.0f), timeToNextShot(0.0f)
 {
 	friction = 100.0f;
 	forceValue = 1000.0f + friction;
@@ -38,8 +37,12 @@ void Player::processInput()
 	}
 }
 
-void Player::update(double deltaTime)
+void Player::update(float deltaTime)
 {
+	if (timeToNextShot > 0.0f)
+	{
+		timeToNextShot -= deltaTime;
+	}
 	// TODO: do not leave window
 
 
@@ -66,23 +69,35 @@ void Player::update(double deltaTime)
 	direction = glm::vec2(0.0f);
 	/**/
 	/**/
-	glm::vec2 userForce = zeroVector;
-	if (direction != zeroVector)
+	glm::vec2 userForce = geom::zeroVector;
+	if (direction != geom::zeroVector)
 	{
 		userForce = forceValue * glm::normalize(direction);
 	}
 	else if (glm::length(currentVelocity) < 10.0f)
 	{
-		currentVelocity = zeroVector;
+		currentVelocity = geom::zeroVector;
 		return;
 	}
 	position += computeTrajectory(currentVelocity, (float)deltaTime);
 	glm::vec2 frictionForce = computeFrictionForce(currentVelocity);
 	glm::vec2 dragForce = computeDragForce(currentVelocity);
-	glm::vec2 velocityFromForces = velocityFromForce(userForce + frictionForce + dragForce, (float)deltaTime);
+	glm::vec2 velocityFromForces = velocityFromForce(userForce + frictionForce + dragForce, deltaTime);
 	currentVelocity += velocityFromForces;
-	direction = zeroVector;
+	direction = geom::zeroVector;
 	/**/
+}
+
+bool Player::canShoot()
+{
+	return timeToNextShot <= 0.0f;
+}
+
+std::shared_ptr<Bullet> Player::shoot()
+{
+	auto bullet = std::make_shared<Bullet>();
+	timeToNextShot = shootDelay;
+	return bullet;
 }
 
 glm::vec2 Player::computeTrajectory(glm::vec2 velocity, float deltaTime)
@@ -102,21 +117,21 @@ glm::vec2 Player::interpolate(glm::vec2 velocity, glm::vec2 desiredVelocity)
 	float progress = accelerationTime * glm::clamp(1 - velocityChange / maxSpeed, 0.0f, 1.0f);
 	float t = accelerationFunction(progress, accelerationTime, maxSpeed);
 	return t * velocity + (1 - t) * desiredVelocity;*/
-	return zeroVector;
+	return geom::zeroVector;
 }
 
 float Player::accelerationFunction(float x, float maxDomain, float maxValue)
 {
-	float pi = glm::pi<float>();
+	constexpr float pi = glm::pi<float>();
 	return (-glm::cos(x * pi / maxDomain) + 1) / 2;
 }
 
 
 glm::vec2 Player::computeFrictionForce(glm::vec2 velocity)
 {
-	if (velocity == zeroVector)
+	if (velocity == geom::zeroVector)
 	{
-		return zeroVector;
+		return geom::zeroVector;
 	}
 	return (-friction) * glm::normalize(velocity);
 }

@@ -16,10 +16,9 @@ class Renderer
 {
 public:
     Renderer();
-
-    // TODO: predej resource manager, kam pridas bilou texturu
-    void init(ResourceManager& resources); // init buffers
-    void drawQuad(const std::shared_ptr<Shader>& shader, const std::shared_ptr<Texture2D>& texture, glm::vec3 color) const;
+    void init(std::shared_ptr<Shader> shader);
+    void drawQuad(const std::shared_ptr<Texture2D>& texture, glm::vec2 position, glm::vec2 size,
+        float rotation = 0.0f, glm::vec3 color = glm::vec3(1.0f)) const;
 
 private:
     struct Vertex
@@ -29,7 +28,7 @@ private:
     };
     static const unsigned int VERTEX_COUNT = 6;
     unsigned int m_quadVAO;
-    std::shared_ptr<Texture2D> m_whiteTexture;
+    std::shared_ptr<Shader> m_shader;
 
     std::array<Vertex, Renderer::VERTEX_COUNT> getVertices() const;
     unsigned int createQuadVAO(const void* data) const;

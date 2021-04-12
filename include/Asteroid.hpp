@@ -12,7 +12,7 @@ public:
     float angularVelocity;
 
     Asteroid();
-    void update(double deltaTime) override;
+    void update(float deltaTime) override;
 };
 
 #endif

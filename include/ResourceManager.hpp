@@ -11,27 +11,23 @@
 class ResourceManager final
 {
 public:
-    // TODO: create with 2 file paths: file with shader names, file with texture names
-    // TODO: static class or not?
-    ResourceManager();
-    ResourceManager(const std::string& shaderListPath, const std::string& textureListPath);
-    // TODO: destructor - clear resources or not?
-
-    void loadShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath);
-    void loadTexture(const std::string& name, const std::string& path, bool alpha);
-    void addTexture(const std::string& name, std::shared_ptr<Texture2D> texture);
+    static void loadShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath);
+    static void loadTexture(const std::string& name, const std::string& path, bool alpha);
+    static void addTexture(const std::string& name, std::shared_ptr<Texture2D> texture);
     
-    std::shared_ptr<Shader> getShader(const std::string& name) const;
-    std::shared_ptr<Texture2D> getTexture(const std::string& name) const;
+    static std::shared_ptr<Shader> getShader(const std::string& name);
+    static std::shared_ptr<Texture2D> getTexture(const std::string& name);
 
-    void clear();
+    static void clear();
 
 private:
-    std::unordered_map<std::string, std::shared_ptr<Shader>> m_shaders;
-    std::unordered_map<std::string, std::shared_ptr<Texture2D>> m_textures;
+    ResourceManager();
+
+    static std::unordered_map<std::string, std::shared_ptr<Shader>> s_shaders;
+    static std::unordered_map<std::string, std::shared_ptr<Texture2D>> s_textures;
 
     // TODO: std::ifstream::failure (std::io_base::failure) exception may be thrown
-    std::string readFile(const std::string& path) const;
+    static std::string readFile(const std::string& path);
 };
 
 #endif

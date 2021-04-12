@@ -2,6 +2,7 @@
 #define PLAYER_HPP
 
 #include "GameObject.hpp"
+#include "Bullet.hpp"
 
 #include <glm/vec2.hpp>
 
@@ -10,18 +11,20 @@ class Player : public GameObject
 public:
     float forceValue;
     float friction;
-    float bulletsPerSecond;
+    float shootDelay;
 
     Player();
     //Player(std::shared_ptr<Texture2D> texture, const std::vector<glm::vec2>& bounds, float force);
 
     void processInput();
-    virtual void update(double deltaTime) override;
+    virtual void update(float deltaTime) override;
+    bool canShoot();
+    std::shared_ptr<Bullet> shoot();
 
 private:
-    static const glm::vec2 zeroVector;
     glm::vec2 currentVelocity;
     glm::vec2 direction;
+    double timeToNextShot;
 
     glm::vec2 computeDragVelocity(glm::vec2 velocity, float deltaTime);
     glm::vec2 computeTrajectory(glm::vec2 velocity, float deltaTime);
