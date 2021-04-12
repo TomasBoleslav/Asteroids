@@ -193,16 +193,25 @@ void Game::update(float deltaTime)
 
 void Game::checkForCollisions()
 {
-    std::size_t i = 0;
-    while (i < m_asteroids.size())
-    {
-        if (m_player.collidesWith(m_asteroids[i]))
+    m_asteroids.erase(std::remove_if(m_asteroids.begin(), m_asteroids.end(),
+        [this](const std::shared_ptr<Asteroid> asteroid)
         {
-            m_asteroids.erase(m_asteroids.begin() + i);
+            for (auto it = m_bullets.begin(); it != m_bullets.end(); ++it)
+            {
+                if ((*it)->collidesWith(asteroid))
+                {
+                    m_bullets.erase(it);
+                    return true;
+                }
+            }
+            return false;
         }
-        else
+        ), m_asteroids.end());
+    for (auto&& asteroid : m_asteroids)
+    {
+        if (m_player.collidesWith(asteroid))
         {
-            ++i;
+            // TODO: end game
         }
     }
 }
