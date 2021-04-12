@@ -19,6 +19,8 @@ namespace geom
 
     glm::mat4 getModelMatrix(glm::vec2 position, glm::vec2 size, float rotation);
     glm::vec2 getCirclePoint(glm::vec2 center, float radius, float angle);
+
+    glm::vec2 getDirection(float angleDeg);
 }
 
 #endif

@@ -1,6 +1,7 @@
 #include "Window.hpp"
 
 #include "Input.hpp"
+#include "Errors.hpp"
 
 #include <stdexcept>
 
@@ -41,6 +42,9 @@ Window::Window(unsigned int width, unsigned int height, const std::string& title
     }
     glfwSetKeyCallback(m_window, keyCallback);
     glfwSetFramebufferSizeCallback(m_window, frameBufferSizeCallback);
+    GL_CALL(glViewport(0, 0, width, height));
+    GL_CALL(glEnable(GL_BLEND));
+    GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 }
 
 Window::~Window()

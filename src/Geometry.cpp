@@ -130,3 +130,11 @@ glm::mat4 geom::getModelMatrix(glm::vec2 position, glm::vec2 size, float rotatio
     model = glm::scale(model, glm::vec3(size, 1.0f));
     return model;
 }
+
+glm::vec2 geom::getDirection(float angleDeg)
+{
+    return glm::vec2(
+        glm::cos(glm::radians(angleDeg)),
+        glm::sin(glm::radians(angleDeg))
+    );
+}

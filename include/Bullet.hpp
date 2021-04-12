@@ -6,7 +6,7 @@
 class Bullet : public GameObject
 {
 public:
-    float speed;
+    glm::vec2 velocity;
     Bullet();
     void update(float deltaTime) override;
 };
