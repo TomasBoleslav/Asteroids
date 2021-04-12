@@ -25,6 +25,7 @@ set(SOURCE_FILES
 	"Asteroid.cpp"
 	"Geometry.cpp"
 	"Bullet.cpp"
+	"Random.cpp"
 	)
 list(TRANSFORM SOURCE_FILES PREPEND "${SRC_DIR}/")
 set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")

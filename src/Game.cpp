@@ -4,6 +4,7 @@
 #include "Shader.hpp"
 #include "Texture2D.hpp"
 #include "Input.hpp"
+#include "Random.hpp"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -18,8 +19,9 @@
 const float Game::UPDATES_PER_SEC = 60.0;
 const float Game::UPDATE_INTERVAL = 1 / UPDATES_PER_SEC;
 
-Game::Game()
+Game::Game() : timeToNextAsteroid(1.0f), asteroidsPerSec(1.0f)
 {
+    m_asteroidSizes = { 30.0, 50.0, 70.0 };
 }
 
 Game::~Game()
@@ -41,7 +43,7 @@ void Game::init()
     setCommonUniforms();
     m_renderer.init(ResourceManager::getShader("simple"));
     initPlayer();
-
+    random::setSeed(1);
 
     for (size_t i = 0; i < 10; i++)
     {
@@ -57,6 +59,7 @@ void Game::init()
         };
         m_asteroids.push_back(asteroid);
     }
+    createAsteroid();
 }
 
 void Game::createWindow()
@@ -170,6 +173,13 @@ void Game::render()
 
 void Game::update(float deltaTime)
 {
+    timeToNextAsteroid -= deltaTime;
+    if (timeToNextAsteroid < 0.0f)
+    {
+        createAsteroid();
+        timeToNextAsteroid = 1.0f; // TODO: correct
+    }
+
     m_player.update(deltaTime);
     for (auto&& asteroid : m_asteroids)
     {
@@ -179,7 +189,6 @@ void Game::update(float deltaTime)
     {
         bullet->update(deltaTime);
     }
-    //checkForCollisions();
 }
 
 void Game::checkForCollisions()
@@ -199,25 +208,34 @@ void Game::checkForCollisions()
 }
 
 void Game::createAsteroid()
-{/*
-    const int minSize = 30;
-    const int maxSize = 100;
-    float size = rand(maxSize);
+{
+    const float minSpeed = 20.0f;
+    const float maxSpeed = 50.0f;
+    const float minAngVelocity = -30.0f;
+    const float maxAngVelocity = 30.0f;
+    float size = m_asteroidSizes[random::getSizeT(m_asteroidSizes.size() - 1)];
+    glm::vec2 position = glm::vec2(random::getFloat(0.0f, SCR_WIDTH), -2.0f * size);
+    glm::vec2 dirLeft = glm::vec2(0.0f, SCR_HEIGHT) - position;
+    glm::vec2 dirRight = glm::vec2(SCR_WIDTH, SCR_HEIGHT) - position;
+    glm::vec2 direction = glm::normalize(random::getVec2(dirLeft, dirRight));
+
     std::shared_ptr<Asteroid> asteroid = std::make_shared<Asteroid>();
     asteroid->texture = ResourceManager::getTexture("asteroid");
-    asteroid->size = glm::vec2(64.0f, 64.0f);
-    asteroid->position = glm::vec2(50.0f, 80.0f);
-    asteroid->velocity = 0.0f * glm::vec2(0.0, 1.0);
-    asteroid->angularVelocity = 30.0f;
+    asteroid->size = glm::vec2(size);
+    asteroid->position = position;
+    asteroid->rotation = random::getFloat(0.0f, 360.0f);
+    asteroid->velocity = random::getFloat(minSpeed, maxSpeed) * direction;
+    asteroid->angularVelocity = random::getFloat(minAngVelocity, maxAngVelocity);
     asteroid->bounds = {
         glm::vec2(0.5f, 0.0f), glm::vec2(1.0f, 0.5f), glm::vec2(0.75f, 1.0f),
         glm::vec2(0.25f, 1.0f), glm::vec2(0.0f, 0.75f), glm::vec2(0.15f, 0.25f)
     };
-    m_asteroids.push_back(asteroid);*/
+    m_asteroids.push_back(asteroid);
 }
 
 bool Game::objectLeftWindow(std::shared_ptr<GameObject> gameObject)
 {
+    // TODO: test if objects get destroyed
     glm::vec2 pos = gameObject->position;
     glm::vec2 windowMiddle = glm::vec2(SCR_WIDTH / 2, SCR_HEIGHT / 2);
     return glm::length(pos - windowMiddle) > 2 * std::max(SCR_WIDTH, SCR_HEIGHT);

@@ -24,6 +24,9 @@ private:
     static const unsigned int SCR_HEIGHT = 600;
     static const float UPDATES_PER_SEC;
     static const float UPDATE_INTERVAL;
+    static const float MAX_ASTEROIDS_PER_SEC;
+    static const float MAX_UPDATE_TIME_INCREASE;
+    static const float TIME_TO_HIGHEST_LEVEL;
 
     std::unique_ptr<Window> m_window;
     Renderer m_renderer;
@@ -31,6 +34,13 @@ private:
     Player m_player;
     std::vector<std::shared_ptr<Asteroid>> m_asteroids;
     std::vector<std::shared_ptr<Bullet>> m_bullets;
+
+    std::vector<float> m_asteroidSizes;
+    float timeToNextAsteroid;
+    float asteroidsPerSec;
+    float maxAsteroidsPerSec;
+    float updateTimeIncrease;
+    float maxUpdateTimeIncrease;
 
     void init();
     void createWindow();

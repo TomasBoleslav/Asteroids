@@ -7,8 +7,9 @@ namespace random
 {
     void setSeed(unsigned seed);
     float getFloat();
-    float getFloat(float minValue, float maxValue);
-    glm::vec2 getVec2(glm::vec2 minValue, glm::vec2 maxValue);
+    float getFloat(float value1, float value2);
+    glm::vec2 getVec2(glm::vec2 vec1, glm::vec2 vec2);
+    std::size_t getSizeT(std::size_t max);
 }
 
 #endif
