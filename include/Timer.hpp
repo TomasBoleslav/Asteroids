@@ -4,11 +4,12 @@
 class Timer
 {
 public:
+    Timer();
     void start(double duration);
     bool finished();
 private:
-    double m_startTime;
     double m_duration;
+    double m_startTime;
 };
 
 #endif

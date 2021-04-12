@@ -3,6 +3,7 @@
 
 #include "GameObject.hpp"
 #include "Bullet.hpp"
+#include "Timer.hpp"
 
 #include <glm/vec2.hpp>
 
@@ -11,7 +12,7 @@ class Player : public GameObject
 public:
     float forceValue;
     float friction;
-    float shootDelay;
+    double shootDelay;
 
     Player();
     //Player(std::shared_ptr<Texture2D> texture, const std::vector<glm::vec2>& bounds, float force);
@@ -24,7 +25,7 @@ public:
 private:
     glm::vec2 currentVelocity;
     glm::vec2 direction;
-    double timeToNextShot;
+    Timer nextShotTimer;
 
     glm::vec2 computeDragVelocity(glm::vec2 velocity, float deltaTime);
     glm::vec2 computeTrajectory(glm::vec2 velocity, float deltaTime);

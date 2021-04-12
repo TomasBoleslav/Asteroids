@@ -10,7 +10,7 @@
 #include <glm/trigonometric.hpp>
 #include <glm/gtc/constants.hpp>
 
-Player::Player() : shootDelay(1.0f), currentVelocity(0.0f), direction(0.0f), timeToNextShot(0.0f)
+Player::Player() : shootDelay(1.0), currentVelocity(0.0f), direction(0.0f)
 {
 	friction = 100.0f;
 	forceValue = 1000.0f + friction;
@@ -39,10 +39,6 @@ void Player::processInput()
 
 void Player::update(float deltaTime)
 {
-	if (timeToNextShot > 0.0f)
-	{
-		timeToNextShot -= deltaTime;
-	}
 	// TODO: do not leave window
 
 
@@ -90,13 +86,13 @@ void Player::update(float deltaTime)
 
 bool Player::canShoot()
 {
-	return timeToNextShot <= 0.0f;
+	return nextShotTimer.finished();
 }
 
 std::shared_ptr<Bullet> Player::shoot()
 {
 	auto bullet = std::make_shared<Bullet>();
-	timeToNextShot = shootDelay;
+	nextShotTimer.start(shootDelay);
 	return bullet;
 }
 

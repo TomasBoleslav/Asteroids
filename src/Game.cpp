@@ -81,7 +81,7 @@ void Game::initPlayer()
         glm::vec2(0.0f, 1.0f), glm::vec2(0.5f, 0.75f),
         glm::vec2(1.0f, 1.0f), glm::vec2(0.5f, 0.0f)
     };
-    m_player.shootDelay = 0.01f;
+    m_player.shootDelay = 1.0f;
     // TODO: set force and friction
 }
 
@@ -119,7 +119,7 @@ void Game::processInput()
     if (Input::isKeyPressed(GLFW_KEY_SPACE) && m_player.canShoot())
     {
         auto bullet = m_player.shoot();
-        bullet->speed += 5000.0f;
+        bullet->speed += 100.0f;
         bullet->size = glm::vec2(50.0f, 50.0f);
         bullet->bounds = {
             glm::vec2(0.0f, 0.0f), glm::vec2(1.0f, 0.0f),

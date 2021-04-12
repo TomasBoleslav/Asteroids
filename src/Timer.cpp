@@ -3,6 +3,10 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+Timer::Timer() : m_duration(0.0), m_startTime(0.0)
+{
+}
+
 void Timer::start(double duration)
 {
     m_duration = duration;
