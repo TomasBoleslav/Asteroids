@@ -26,6 +26,7 @@ set(SOURCE_FILES
 	"Geometry.cpp"
 	"Bullet.cpp"
 	"Random.cpp"
+	"Timer.cpp"
 	)
 list(TRANSFORM SOURCE_FILES PREPEND "${SRC_DIR}/")
 set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")

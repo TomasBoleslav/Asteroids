@@ -26,9 +26,9 @@ private:
     const glm::vec2 SCR_CENTER = glm::vec2(SCR_WIDTH / 2.0f, SCR_HEIGHT / 2.0f);
     const float UPDATES_PER_SEC = 60.0;
     const float UPDATE_INTERVAL = 1.0f / UPDATES_PER_SEC;
-    const float MAX_ASTEROIDS_PER_SEC;
-    const float MAX_UPDATE_TIME_INCREASE;
-    const float TIME_TO_HIGHEST_LEVEL;
+    const float MAX_ASTEROIDS_PER_SEC = 0.0f;
+    const float MAX_UPDATE_TIME_INCREASE = 0.0f;
+    const float TIME_TO_HIGHEST_LEVEL = 0.0f;
 
     std::unique_ptr<Window> m_window;
 

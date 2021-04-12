@@ -18,6 +18,7 @@ namespace geom
     bool doPolygonsIntersect(const std::vector<glm::vec2>& polygon1, const std::vector<glm::vec2>& polygon2);
 
     glm::mat4 getModelMatrix(glm::vec2 position, glm::vec2 size, float rotation);
+    glm::vec2 getCirclePoint(glm::vec2 center, float radius, float angle);
 }
 
 #endif
