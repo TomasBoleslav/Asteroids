@@ -5,6 +5,7 @@
 #include "Texture2D.hpp"
 #include "Input.hpp"
 #include "Random.hpp"
+#include "Geometry.hpp"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -29,7 +30,7 @@ Game::~Game()
 void Game::run()
 {
     init();
-    resetGame();
+    restartGame();
     gameLoop();
 }
 
@@ -53,9 +54,9 @@ void Game::createWindow()
     Window::setHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
     m_window = std::make_unique<Window>(SCR_WIDTH, SCR_HEIGHT, "SpaceGame");
-    glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    GL_CALL(glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT));
+    GL_CALL(glEnable(GL_BLEND));
+    GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 }
 
 void Game::loadResources()
@@ -85,10 +86,14 @@ void Game::initPlayer()
     // TODO: set force and friction
 }
 
-void Game::resetGame()
+void Game::restartGame()
 {
-    m_player.position.x = (SCR_WIDTH - m_player.size.x) / 2;
-    m_player.position.y = 3 * SCR_HEIGHT / 4 - m_player.size.y;
+    m_state = GameState::Start;
+    m_stateTimer.start(TIME_BETWEEN_STATES);
+    m_player.position = SCR_CENTER;
+    m_player.velocity = glm::vec2(0.0f);
+    m_asteroids.clear();
+    m_bullets.clear();
 }
 
 void Game::gameLoop()
@@ -96,11 +101,11 @@ void Game::gameLoop()
     double lastUpdated = glfwGetTime();
     while (!m_window->shouldClose())
     {
+        determineState();
         processInput();
         double currentTime = glfwGetTime();
         while (lastUpdated + UPDATE_INTERVAL <= currentTime)
         {
-            checkForCollisions();
             lastUpdated += UPDATE_INTERVAL;
             update(UPDATE_INTERVAL);
         }
@@ -116,20 +121,11 @@ void Game::processInput()
         m_window->setToClose();
         return;
     }
-    if (Input::isKeyPressed(GLFW_KEY_SPACE) && m_player.canShoot())
+    if (Input::isKeyPressed(GLFW_KEY_SPACE) && m_state == GameState::Running && m_player.canShoot())
     {
-        auto bullet = m_player.shoot();
-        bullet->speed += 100.0f;
-        bullet->size = glm::vec2(50.0f, 50.0f);
-        bullet->bounds = {
-            glm::vec2(0.0f, 0.0f), glm::vec2(1.0f, 0.0f),
-            glm::vec2(1.0f, 1.0f), glm::vec2(0.0f, 1.0f)
-        };
-        bullet->position = m_player.position + glm::vec2((m_player.size.x - bullet->size.x) / 2, 0.0f);
-        m_bullets.push_back(bullet);
+        shootBullet();
     }
-    m_player.processInput();
-    
+    m_player.processInput(); 
 }
 
 void Game::render()
@@ -139,7 +135,10 @@ void Game::render()
     auto background = ResourceManager::getTexture("background");
     m_renderer.drawQuad(background, glm::vec2(0.0f), glm::vec2(SCR_WIDTH, SCR_HEIGHT));
 
-    m_player.draw(m_renderer);
+    if (m_state != GameState::Over)
+    {
+        m_player.draw(m_renderer);
+    }
     for (auto&& asteroid : m_asteroids)
     {
         asteroid->draw(m_renderer);
@@ -151,17 +150,36 @@ void Game::render()
     m_window->swapBuffers();
 }
 
+void Game::determineState()
+{
+    switch (m_state)
+    {
+    case GameState::Start:
+        if (m_stateTimer.finished())
+        {
+            m_state = GameState::Running;
+        }
+        break;
+    case GameState::Over:
+        if (m_stateTimer.finished())
+        {
+            restartGame();
+        }
+        break;
+    }
+}
 
 void Game::update(float deltaTime)
 {
-    timeToNextAsteroid -= deltaTime;
-    while (timeToNextAsteroid < 0.0f)
+    if (m_state == GameState::Running)
     {
-        createAsteroid();
-        timeToNextAsteroid += 1.0f / asteroidsPerSec; // TODO: correct
+        checkForCollisions();
+        spawnAsteroids(deltaTime);
     }
-
-    m_player.update(deltaTime);
+    if (m_state != GameState::Over)
+    {
+        m_player.update(deltaTime);
+    }
     for (auto&& asteroid : m_asteroids)
     {
         asteroid->update(deltaTime);
@@ -170,8 +188,18 @@ void Game::update(float deltaTime)
     {
         bullet->update(deltaTime);
     }
-    removeLeftObjects<Asteroid>(m_asteroids);
-    removeLeftObjects<Bullet>(m_bullets);
+    removeLeftObjects(m_asteroids);
+    removeLeftObjects(m_bullets);
+}
+
+void Game::spawnAsteroids(float deltaTime)
+{
+    timeToNextAsteroid -= deltaTime;
+    while (timeToNextAsteroid < 0.0f)
+    {
+        createAsteroid();
+        timeToNextAsteroid += 1.0f / asteroidsPerSec; // TODO: correct
+    }
 }
 
 void Game::checkForCollisions()
@@ -194,7 +222,7 @@ void Game::checkForCollisions()
     {
         if (m_player.collidesWith(asteroid))
         {
-            // TODO: end game
+            gameOver();
         }
     }
 }
@@ -242,4 +270,29 @@ bool Game::objectLeftWindow(std::shared_ptr<GameObject> gameObject)
     glm::vec2 pos = gameObject->position;
     glm::vec2 windowMiddle = glm::vec2(SCR_WIDTH / 2, SCR_HEIGHT / 2);
     return glm::length(pos - windowMiddle) > 2 * std::max(SCR_WIDTH, SCR_HEIGHT);
+}
+
+void Game::gameOver()
+{
+    m_state = GameState::Over;
+    m_stateTimer.start(TIME_BETWEEN_STATES);
+}
+
+template<typename T, typename F>
+void Game::forObjects(const std::vector<std::shared_ptr<T>>& objects, F function)
+{
+    std::for_each(objects.begin(), objects.end(), function);
+}
+
+void Game::shootBullet()
+{
+    auto bullet = m_player.shoot();
+    bullet->speed = 100.0f;
+    bullet->size = glm::vec2(50.0f, 50.0f);
+    bullet->bounds = {
+        glm::vec2(0.0f, 0.0f), glm::vec2(1.0f, 0.0f),
+        glm::vec2(1.0f, 1.0f), glm::vec2(0.0f, 1.0f)
+    };
+    bullet->position = m_player.position + glm::vec2((m_player.size.x - bullet->size.x) / 2, 0.0f);
+    m_bullets.push_back(bullet);
 }

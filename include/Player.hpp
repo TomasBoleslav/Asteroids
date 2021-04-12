@@ -10,6 +10,7 @@
 class Player : public GameObject
 {
 public:
+    glm::vec2 velocity;
     float forceValue;
     float friction;
     double shootDelay;
@@ -23,7 +24,6 @@ public:
     std::shared_ptr<Bullet> shoot();
 
 private:
-    glm::vec2 currentVelocity;
     glm::vec2 direction;
     Timer nextShotTimer;
 

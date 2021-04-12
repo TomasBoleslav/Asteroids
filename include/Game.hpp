@@ -20,7 +20,7 @@ public:
     void run();
 
 private:
-    enum class GameState { Start, Running, End };
+    enum class GameState { Start, Running, Over };
     const unsigned int SCR_WIDTH = 800;
     const unsigned int SCR_HEIGHT = 600;
     const glm::vec2 SCR_CENTER = glm::vec2(SCR_WIDTH / 2.0f, SCR_HEIGHT / 2.0f);
@@ -29,10 +29,13 @@ private:
     const float MAX_ASTEROIDS_PER_SEC = 0.0f;
     const float MAX_UPDATE_TIME_INCREASE = 0.0f;
     const float TIME_TO_HIGHEST_LEVEL = 0.0f;
+    const double TIME_BETWEEN_STATES = 3.0;
 
     std::unique_ptr<Window> m_window;
 
     GameState m_state;
+    Timer m_stateTimer;
+
     Renderer m_renderer;
 
     Player m_player;
@@ -51,7 +54,7 @@ private:
     void loadResources();
     void setCommonUniforms();
     void initPlayer();
-    void resetGame();
+    void restartGame();
 
     void gameLoop();
     void processInput();
@@ -60,9 +63,21 @@ private:
     void checkForCollisions();
     void createAsteroid();
 
+    void spawnAsteroids(float deltaTime);
+
+    void determineState();
+    void gameOver();
+
+    void shootBullet();
+
     template<typename T>
     void removeLeftObjects(std::vector<std::shared_ptr<T>>& objects);
+
     bool objectLeftWindow(std::shared_ptr<GameObject> gameObject);
+
+    template<typename T, typename F>
+    void forObjects(const std::vector<std::shared_ptr<T>>& objects, F function);
+
 };
 
 #endif

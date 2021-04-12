@@ -10,7 +10,7 @@
 #include <glm/trigonometric.hpp>
 #include <glm/gtc/constants.hpp>
 
-Player::Player() : shootDelay(1.0), currentVelocity(0.0f), direction(0.0f)
+Player::Player() : shootDelay(1.0), velocity(0.0f), direction(0.0f)
 {
 	friction = 100.0f;
 	forceValue = 1000.0f + friction;
@@ -70,16 +70,16 @@ void Player::update(float deltaTime)
 	{
 		userForce = forceValue * glm::normalize(direction);
 	}
-	else if (glm::length(currentVelocity) < 10.0f)
+	else if (glm::length(velocity) < 10.0f)
 	{
-		currentVelocity = geom::zeroVector;
+		velocity = geom::zeroVector;
 		return;
 	}
-	position += computeTrajectory(currentVelocity, (float)deltaTime);
-	glm::vec2 frictionForce = computeFrictionForce(currentVelocity);
-	glm::vec2 dragForce = computeDragForce(currentVelocity);
+	position += computeTrajectory(velocity, (float)deltaTime);
+	glm::vec2 frictionForce = computeFrictionForce(velocity);
+	glm::vec2 dragForce = computeDragForce(velocity);
 	glm::vec2 velocityFromForces = velocityFromForce(userForce + frictionForce + dragForce, deltaTime);
-	currentVelocity += velocityFromForces;
+	velocity += velocityFromForces;
 	direction = geom::zeroVector;
 	/**/
 }
