@@ -20,15 +20,19 @@ public:
     void run();
 
 private:
-    static const unsigned int SCR_WIDTH = 800;
-    static const unsigned int SCR_HEIGHT = 600;
-    static const float UPDATES_PER_SEC;
-    static const float UPDATE_INTERVAL;
-    static const float MAX_ASTEROIDS_PER_SEC;
-    static const float MAX_UPDATE_TIME_INCREASE;
-    static const float TIME_TO_HIGHEST_LEVEL;
+    enum class GameState { Start, Running, End };
+    const unsigned int SCR_WIDTH = 800;
+    const unsigned int SCR_HEIGHT = 600;
+    const glm::vec2 SCR_CENTER = glm::vec2(SCR_WIDTH / 2.0f, SCR_HEIGHT / 2.0f);
+    const float UPDATES_PER_SEC = 60.0;
+    const float UPDATE_INTERVAL = 1.0f / UPDATES_PER_SEC;
+    const float MAX_ASTEROIDS_PER_SEC;
+    const float MAX_UPDATE_TIME_INCREASE;
+    const float TIME_TO_HIGHEST_LEVEL;
 
     std::unique_ptr<Window> m_window;
+
+    GameState m_state;
     Renderer m_renderer;
 
     Player m_player;
@@ -55,6 +59,9 @@ private:
     void render();
     void checkForCollisions();
     void createAsteroid();
+
+    template<typename T>
+    void removeLeftObjects(std::vector<std::shared_ptr<T>>& objects);
     bool objectLeftWindow(std::shared_ptr<GameObject> gameObject);
 };
 

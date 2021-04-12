@@ -16,10 +16,7 @@
 #include <algorithm>
 #include <cstdlib>
 
-const float Game::UPDATES_PER_SEC = 60.0;
-const float Game::UPDATE_INTERVAL = 1 / UPDATES_PER_SEC;
-
-Game::Game() : timeToNextAsteroid(1.0f), asteroidsPerSec(1.0f)
+Game::Game() : timeToNextAsteroid(1.0f), asteroidsPerSec(5.0f)
 {
     m_asteroidSizes = { 30.0, 50.0, 70.0 };
 }
@@ -44,22 +41,6 @@ void Game::init()
     m_renderer.init(ResourceManager::getShader("simple"));
     initPlayer();
     random::setSeed(1);
-
-    for (size_t i = 0; i < 10; i++)
-    {
-        std::shared_ptr<Asteroid> asteroid = std::make_shared<Asteroid>();
-        asteroid->texture = ResourceManager::getTexture("asteroid");
-        asteroid->size = glm::vec2(64.0f, 64.0f);
-        asteroid->position = (float)i * glm::vec2(50.0f, 80.0f);
-        asteroid->velocity = 0.0f * glm::vec2(0.0, 1.0);
-        asteroid->angularVelocity = 30.0f;
-        asteroid->bounds = {
-            glm::vec2(0.5f, 0.0f), glm::vec2(1.0f, 0.5f), glm::vec2(0.75f, 1.0f),
-            glm::vec2(0.25f, 1.0f), glm::vec2(0.0f, 0.75f), glm::vec2(0.15f, 0.25f)
-        };
-        m_asteroids.push_back(asteroid);
-    }
-    createAsteroid();
 }
 
 void Game::createWindow()
@@ -100,7 +81,7 @@ void Game::initPlayer()
         glm::vec2(0.0f, 1.0f), glm::vec2(0.5f, 0.75f),
         glm::vec2(1.0f, 1.0f), glm::vec2(0.5f, 0.0f)
     };
-    m_player.shootDelay = 0.5f;
+    m_player.shootDelay = 0.01f;
     // TODO: set force and friction
 }
 
@@ -138,7 +119,7 @@ void Game::processInput()
     if (Input::isKeyPressed(GLFW_KEY_SPACE) && m_player.canShoot())
     {
         auto bullet = m_player.shoot();
-        bullet->speed += 400.0f;
+        bullet->speed += 5000.0f;
         bullet->size = glm::vec2(50.0f, 50.0f);
         bullet->bounds = {
             glm::vec2(0.0f, 0.0f), glm::vec2(1.0f, 0.0f),
@@ -174,10 +155,10 @@ void Game::render()
 void Game::update(float deltaTime)
 {
     timeToNextAsteroid -= deltaTime;
-    if (timeToNextAsteroid < 0.0f)
+    while (timeToNextAsteroid < 0.0f)
     {
         createAsteroid();
-        timeToNextAsteroid = 1.0f; // TODO: correct
+        timeToNextAsteroid += 1.0f / asteroidsPerSec; // TODO: correct
     }
 
     m_player.update(deltaTime);
@@ -189,12 +170,14 @@ void Game::update(float deltaTime)
     {
         bullet->update(deltaTime);
     }
+    removeLeftObjects<Asteroid>(m_asteroids);
+    removeLeftObjects<Bullet>(m_bullets);
 }
 
 void Game::checkForCollisions()
 {
     m_asteroids.erase(std::remove_if(m_asteroids.begin(), m_asteroids.end(),
-        [this](const std::shared_ptr<Asteroid> asteroid)
+        [this](const std::shared_ptr<Asteroid>& asteroid)
         {
             for (auto it = m_bullets.begin(); it != m_bullets.end(); ++it)
             {
@@ -218,8 +201,8 @@ void Game::checkForCollisions()
 
 void Game::createAsteroid()
 {
-    const float minSpeed = 20.0f;
-    const float maxSpeed = 50.0f;
+    const float minSpeed = 5000.0f;
+    const float maxSpeed = 6000.0f;
     const float minAngVelocity = -30.0f;
     const float maxAngVelocity = 30.0f;
     float size = m_asteroidSizes[random::getSizeT(m_asteroidSizes.size() - 1)];
@@ -242,9 +225,20 @@ void Game::createAsteroid()
     m_asteroids.push_back(asteroid);
 }
 
+template<typename T>
+void Game::removeLeftObjects(std::vector<std::shared_ptr<T>>& objects)
+{
+    objects.erase(std::remove_if(objects.begin(), objects.end(),
+        [this](const std::shared_ptr<T>& gameObject)
+        {
+            return objectLeftWindow(gameObject);
+        }
+    ), objects.end());
+}
+
+
 bool Game::objectLeftWindow(std::shared_ptr<GameObject> gameObject)
 {
-    // TODO: test if objects get destroyed
     glm::vec2 pos = gameObject->position;
     glm::vec2 windowMiddle = glm::vec2(SCR_WIDTH / 2, SCR_HEIGHT / 2);
     return glm::length(pos - windowMiddle) > 2 * std::max(SCR_WIDTH, SCR_HEIGHT);
