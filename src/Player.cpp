@@ -9,88 +9,66 @@
 #include <glm/common.hpp>
 #include <glm/trigonometric.hpp>
 #include <glm/gtc/constants.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
-Player::Player() : reloadTime(1.0), velocity(0.0f), direction(0.0f)
+Player::Player() : velocity(0.0f), forceValue(0.0f), turnSpeed(0.0f), decay(0.0f), reloadTime(1.0),
+	angularVelocity(0.0f), userForce(0.0f)
 {
-	friction = 100.0f;
-	forceValue = 1000.0f + friction;
-	//forceValue = 10.0f;
 }
 
 void Player::processInput()
 {
-	if (Input::isKeyPressed(GLFW_KEY_RIGHT))
-	{
-		direction.x = 1.0f;
-	}
 	if (Input::isKeyPressed(GLFW_KEY_LEFT))
 	{
-		direction.x = -1.0f;
+		angularVelocity = -turnSpeed;
 	}
-	if (Input::isKeyPressed(GLFW_KEY_DOWN))
+	if (Input::isKeyPressed(GLFW_KEY_RIGHT))
 	{
-		direction.y = 1.0f;
+		angularVelocity = turnSpeed;
 	}
 	if (Input::isKeyPressed(GLFW_KEY_UP))
 	{
-		direction.y = -1.0f;
+		userForce = forceValue;
 	}
 }
 
 void Player::update(float deltaTime)
 {
-	glm::vec2 userForce = geom::zeroVector;
-	if (direction != geom::zeroVector)
-	{
-		userForce = forceValue * glm::normalize(direction);
-	}
-	else if (glm::length(velocity) < 10.0f)
-	{
-		velocity = geom::zeroVector;
-		return;
-	}
-	position += computeTrajectory(velocity, (float)deltaTime);
-	glm::vec2 frictionForce = computeFrictionForce(velocity);
-	glm::vec2 dragForce = computeDragForce(velocity);
-	glm::vec2 velocityFromForces = velocityFromForce(userForce + frictionForce + dragForce, deltaTime);
-	velocity += velocityFromForces;
-	direction = geom::zeroVector;
-	/**/
+	rotation += angularVelocity * deltaTime;
+	glm::vec2 acceleration = geom::getDirection(rotation - 90.0f) * userForce;
+	velocity += acceleration * deltaTime;
+	velocity *= decay;
+	position += velocity * deltaTime;
+	angularVelocity = 0.0f;
+	userForce = 0.0f;
 }
 
 bool Player::canShoot()
 {
-	return nextShotTimer.finished();
+	return reloadTimer.finished();
 }
 
-std::shared_ptr<Bullet> Player::shoot()
+std::shared_ptr<Bullet> Player::shoot(glm::vec2 bulletSize, float speed)
 {
-	auto bullet = std::make_shared<Bullet>();
-	nextShotTimer.start(reloadTime);
+  	auto bullet = std::make_shared<Bullet>();
+	bullet->position = getBulletPosition(bulletSize);
+	glm::vec2 bulletDir = geom::getDirection(rotation - 90.0f);
+	bullet->velocity = (speed + glm::length(velocity)) * bulletDir;
+	bullet->size = bulletSize;
+	bullet->bounds = {
+		glm::vec2(0.0f, 0.0f), glm::vec2(1.0f, 0.0f),
+		glm::vec2(1.0f, 1.0f), glm::vec2(0.0f, 1.0f)
+	};
+	bullet->rotation = rotation;
+	reloadTimer.start(reloadTime);
 	return bullet;
 }
 
-glm::vec2 Player::computeTrajectory(glm::vec2 velocity, float deltaTime)
+glm::vec2 Player::getBulletPosition(glm::vec2 bulletSize)
 {
-	return velocity * deltaTime;
-}
-
-glm::vec2 Player::velocityFromForce(glm::vec2 force, float deltaTime)
-{
-	return force * deltaTime;
-}
-
-glm::vec2 Player::computeFrictionForce(glm::vec2 velocity)
-{
-	if (velocity == geom::zeroVector)
-	{
-		return geom::zeroVector;
-	}
-	return (-friction) * glm::normalize(velocity);
-}
-
-glm::vec2 Player::computeDragForce(glm::vec2 velocity)
-{
-	float absVelocity = glm::length(velocity);
-	return 0.01f * (-absVelocity) * velocity;
+	glm::vec2 normalizedBowPos = glm::vec2(0.5f, 0.0f);
+	glm::mat4 playerModel = geom::getModelMatrix(position, size, rotation);
+	glm::vec2 bowPos = playerModel * glm::vec4(normalizedBowPos, 0.0f, 1.0f);
+	glm::vec2 centeredBulletPos = bowPos - bulletSize / 2.0f;
+	return centeredBulletPos;
 }

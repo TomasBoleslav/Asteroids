@@ -82,7 +82,9 @@ void Game::createPlayer()
         glm::vec2(1.0f, 1.0f), glm::vec2(0.5f, 0.0f)
     };
     m_player->reloadTime = 1.0f;
-    // TODO: set force and friction
+    m_player->forceValue = 400.0f;
+    m_player->decay = 0.99f;
+    m_player->turnSpeed = 180.0f;
 }
 
 void Game::restartGame()
@@ -92,6 +94,7 @@ void Game::restartGame()
     m_level = 0;
     m_player->position = SCR_CENTER;
     m_player->velocity = glm::vec2(0.0f);
+    m_player->rotation = 0.0f;
     m_asteroids.clear();
     m_bullets.clear();
 }
@@ -158,14 +161,6 @@ void Game::determineState()
         if (m_stateTimer.finished())
         {
             m_state = GameState::Running;
-            m_levelTimer.start(TIME_TO_NEXT_LEVEL);
-        }
-        break;
-    case GameState::Running:
-        if (m_levelTimer.finished())
-        {
-            m_level++;
-            spawnAsteroids();
         }
         break;
     case GameState::Over:
@@ -184,7 +179,7 @@ void Game::update(float deltaTime)
         handleCollisions();
         if (m_asteroids.size() == 0)
         {
-            increaseLevel();
+            //increaseLevel();
         }
     }
     if (m_state != GameState::Over)
@@ -210,7 +205,8 @@ void Game::increaseLevel()
 
 void Game::spawnAsteroids()
 {
-    std::size_t count = START_ASTEROID_COUNT + m_level * ASTEROID_COUNT_INCREASE;
+    std::size_t count = ASTEROID_MIN_COUNT + m_level * ASTEROID_COUNT_INCREASE;
+    count = std::min(count, ASTEROID_MAX_COUNT); // TODO: nechat neomezene asteroidu?
     for (size_t i = 0; i < count; i++)
     {
         createAsteroid();
@@ -246,8 +242,8 @@ void Game::createAsteroid()
 {
     std::shared_ptr<Asteroid> asteroid = std::make_shared<Asteroid>();
     float size = random::chooseFromVector<float>(m_asteroidSizes);
-    float speed = random::getFloat(MIN_ASTEROID_SPEED, MAX_ASTEROID_SPEED);
-    float velocityAngle = random::getSizeT(3) * 90.0f + random::getFloat(MIN_ASTEROID_ANGLE, MAX_ASTEROID_ANGLE);
+    float speed = random::getFloat(ASTEROID_MIN_SPEED, ASTEROID_MAX_SPEED);
+    float velocityAngle = random::getSizeT(3) * 90.0f + random::getFloat(ASTEROID_MIN_ANGLE, ASTEROID_MAX_ANGLE);
     asteroid->texture = ResourceManager::getTexture("asteroid");
     asteroid->size = glm::vec2(size);
     asteroid->position = getAsteroidRandomPos(size);
@@ -303,15 +299,7 @@ void Game::forObjects(const std::vector<std::shared_ptr<T>>& objects, F function
 
 void Game::shootBullet()
 {
-    auto bullet = m_player->shoot();
-    bullet->velocity = glm::vec2(0.0f, -200.0f);
-    // TODO: pricti rychlost lode
-    bullet->size = glm::vec2(4.0f, 10.0f);
-    bullet->bounds = {
-        glm::vec2(0.0f, 0.0f), glm::vec2(1.0f, 0.0f),
-        glm::vec2(1.0f, 1.0f), glm::vec2(0.0f, 1.0f)
-    };
-    bullet->position = m_player->position + glm::vec2((m_player->size.x - bullet->size.x) / 2, 0.0f);
+    auto bullet = m_player->shoot(glm::vec2(4.0, 20.0), BULLET_SPEED);
     m_bullets.push_back(bullet);
 }
 

@@ -21,6 +21,7 @@ namespace geom
     glm::vec2 getCirclePoint(glm::vec2 center, float radius, float angle);
 
     glm::vec2 getDirection(float angleDeg);
+    glm::vec2 rotate(glm::vec2 point, glm::vec2 center, float angleDeg);
 }
 
 #endif

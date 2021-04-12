@@ -138,3 +138,16 @@ glm::vec2 geom::getDirection(float angleDeg)
         glm::sin(glm::radians(angleDeg))
     );
 }
+
+glm::vec2 geom::rotate(glm::vec2 point, glm::vec2 center, float angleDeg)
+{
+    float angleRad = glm::radians(angleDeg);
+    float sin = glm::sin(angleRad);
+    float cos = glm::cos(angleRad);
+    glm::vec2 diff = point - center;
+    diff = glm::vec2(
+        diff.x * cos - diff.y * sin,
+        diff.x * sin + diff.y * cos
+    );
+    return diff + center;
+}

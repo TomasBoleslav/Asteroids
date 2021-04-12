@@ -32,25 +32,24 @@ private:
     const std::size_t START_ASTEROID_COUNT = 8;
     const std::size_t ASTEROID_COUNT_INCREASE = 4;
 
-    const std::size_t MIN_ASTEROIDS = 5;
-    const std::size_t MAX_ASTEROIDS = 30;
 
+    const std::size_t ASTEROID_MIN_COUNT = 0;
+    const std::size_t ASTEROID_MAX_COUNT = 30;
     const float ASTEROID_MIN_ROT_SPEED = 10.0f;
     const float ASTEROID_MAX_ROT_SPEED = 30.0f;
-    const float MIN_ASTEROID_SPEED = 50.0f;
-    const float MAX_ASTEROID_SPEED = 150.0f;
-    const glm::vec2 MIN_ASTEROID_DIRECTION = glm::vec2();
-    const float MIN_ASTEROID_ANGLE = 20.0f;
-    const float MAX_ASTEROID_ANGLE = 40.0f;
+    const float ASTEROID_MIN_SPEED = 50.0f;
+    const float ASTEROID_MAX_SPEED = 150.0f;
+    const float ASTEROID_MIN_ANGLE = 20.0f;
+    const float ASTEROID_MAX_ANGLE = 40.0f;
 
 
-    const float BULLET_SPEED = 30.0f;
+    const float BULLET_SPEED = 300.0f;
 
     const float SHIP_TURN_SPEED = 30.0f;
     const float SHIP_FORCE = 100.0f;
 
     const double TIME_TO_NEXT_LEVEL = 60.0f;
-    const double TIME_BETWEEN_STATES = 3.0;
+    const double TIME_BETWEEN_STATES = 0.5;
 
     std::unique_ptr<Window> m_window;
 
@@ -58,7 +57,6 @@ private:
 
     GameState m_state;
     Timer m_stateTimer;
-    Timer m_levelTimer;
 
     Renderer m_renderer;
 
