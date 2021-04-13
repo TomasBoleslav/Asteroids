@@ -4,47 +4,7 @@
 
 #include <algorithm>
 
-bool geom::pointInPolygon(const std::vector<glm::vec2>& polygon, glm::vec2 point)
-{
-    bool inside = false;
-    float x = point.x;  // ray from (x,y) to right (x is horizontal axis)
-    float y = point.y;
-    const float epsilon = 0.01f;
-    glm::vec2 prev = polygon.back();
-    for (auto&& curr : polygon)
-    {
-        glm::vec2 upper, lower;
-        if (prev.y < curr.y)
-        {
-            upper = curr;
-            lower = prev;
-        }
-        else
-        {
-            upper = prev;
-            lower = curr;
-        }
-        if (lower.y <= y && y < upper.y)
-        {
-            if (y - lower.y < epsilon)
-            {
-                lower.y -= epsilon;
-            }
-            if (upper.y - y < epsilon)
-            {
-                upper.y += epsilon;
-            }
-            if ((x - upper.x) * (upper.y - lower.y) < (upper.x - lower.x) * (upper.y - y))
-            {
-                inside = !inside;   // ray intersects with line segment
-            }
-        }
-        prev = curr;
-    }
-    return inside;
-}
-
-bool geom::onSegment(glm::vec2 p, glm::vec2 q, glm::vec2 r)
+bool geom::pointOnSegment(glm::vec2 p, glm::vec2 q, glm::vec2 r)
 {
     if (q.x <= std::max(p.x, r.x) && q.x >= std::min(p.x, r.x) &&
         q.y <= std::max(p.y, r.y) && q.y >= std::min(p.y, r.y))
@@ -53,11 +13,6 @@ bool geom::onSegment(glm::vec2 p, glm::vec2 q, glm::vec2 r)
     return false;
 }
 
-// To find orientation of ordered triplet (p, q, r).
-// The function returns following values
-// 0 --> p, q and r are colinear
-// 1 --> Clockwise
-// 2 --> Counterclockwise
 int geom::orientation(glm::vec2 p, glm::vec2 q, glm::vec2 r)
 {
     // See https://www.geeksforgeeks.org/orientation-3-ordered-points/
@@ -70,9 +25,7 @@ int geom::orientation(glm::vec2 p, glm::vec2 q, glm::vec2 r)
     return (val > 0) ? 1 : 2; // clock or counterclock wise
 }
 
-// The main function that returns true if line segment 'p1q1'
-// and 'p2q2' intersect.
-bool geom::doIntersect(glm::vec2 p1, glm::vec2 q1, glm::vec2 p2, glm::vec2 q2)
+bool geom::segmentsIntersect(glm::vec2 p1, glm::vec2 q1, glm::vec2 p2, glm::vec2 q2)
 {
     // Find the four orientations needed for general and
     // special cases
@@ -87,21 +40,21 @@ bool geom::doIntersect(glm::vec2 p1, glm::vec2 q1, glm::vec2 p2, glm::vec2 q2)
 
     // Special Cases
     // p1, q1 and p2 are colinear and p2 lies on segment p1q1
-    if (o1 == 0 && onSegment(p1, p2, q1)) return true;
+    if (o1 == 0 && pointOnSegment(p1, p2, q1)) return true;
 
     // p1, q1 and q2 are colinear and q2 lies on segment p1q1
-    if (o2 == 0 && onSegment(p1, q2, q1)) return true;
+    if (o2 == 0 && pointOnSegment(p1, q2, q1)) return true;
 
     // p2, q2 and p1 are colinear and p1 lies on segment p2q2
-    if (o3 == 0 && onSegment(p2, p1, q2)) return true;
+    if (o3 == 0 && pointOnSegment(p2, p1, q2)) return true;
 
     // p2, q2 and q1 are colinear and q1 lies on segment p2q2
-    if (o4 == 0 && onSegment(p2, q1, q2)) return true;
+    if (o4 == 0 && pointOnSegment(p2, q1, q2)) return true;
 
     return false; // Doesn't fall in any of the above cases
 }
 
-bool geom::doPolygonsIntersect(const std::vector<glm::vec2>& polygon1, const std::vector<glm::vec2>& polygon2)
+bool geom::polygonsIntersect(const std::vector<glm::vec2>& polygon1, const std::vector<glm::vec2>& polygon2)
 {
     glm::vec2 previous1 = polygon1.back();
     for (auto&& current1 : polygon1)
@@ -109,7 +62,7 @@ bool geom::doPolygonsIntersect(const std::vector<glm::vec2>& polygon1, const std
         glm::vec2 previous2 = polygon2.back();
         for (auto&& current2 : polygon2)
         {
-            if (doIntersect(previous1, current1, previous2, current2))
+            if (segmentsIntersect(previous1, current1, previous2, current2))
             {
                 return true;
             }
@@ -131,23 +84,22 @@ glm::mat4 geom::getModelMatrix(glm::vec2 position, glm::vec2 size, float rotatio
     return model;
 }
 
+std::vector<glm::vec2> geom::transformPolygon(const std::vector<glm::vec2>& polygon, glm::mat4 matrix)
+{
+    std::vector<glm::vec2> newPolygon;
+    newPolygon.reserve(polygon.size());
+    for (const auto& point : polygon)
+    {
+        glm::vec2 newPoint = matrix * glm::vec4(point, 0.0, 1.0);
+        newPolygon.push_back(newPoint);
+    }
+    return newPolygon;
+}
+
 glm::vec2 geom::getDirection(float angleDeg)
 {
     return glm::vec2(
         glm::cos(glm::radians(angleDeg)),
         glm::sin(glm::radians(angleDeg))
     );
-}
-
-glm::vec2 geom::rotate(glm::vec2 point, glm::vec2 center, float angleDeg)
-{
-    float angleRad = glm::radians(angleDeg);
-    float sin = glm::sin(angleRad);
-    float cos = glm::cos(angleRad);
-    glm::vec2 diff = point - center;
-    diff = glm::vec2(
-        diff.x * cos - diff.y * sin,
-        diff.x * sin + diff.y * cos
-    );
-    return diff + center;
 }

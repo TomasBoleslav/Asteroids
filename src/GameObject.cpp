@@ -24,19 +24,11 @@ bool GameObject::collidesWith(const std::shared_ptr<GameObject>& other) const
 {
     auto bounds1 = applyModelOnBounds();
     auto bounds2 = other->applyModelOnBounds();
-    return geom::doPolygonsIntersect(bounds1, bounds2);
+    return geom::polygonsIntersect(bounds1, bounds2);
 }
 
 std::vector<glm::vec2> GameObject::applyModelOnBounds() const
 {
-    std::vector<glm::vec2> transformedBounds;
-    transformedBounds.reserve(bounds.size());
     glm::mat4 model = geom::getModelMatrix(position, size, rotation);
-    for (const auto& point : bounds)
-    {
-        glm::vec4 appliedModel = model * glm::vec4(point, 0.0, 1.0);
-        glm::vec2 transformedPoint = glm::vec2(appliedModel);
-        transformedBounds.push_back(transformedPoint);
-    }
-    return transformedBounds;
+    return geom::transformPolygon(bounds, model);
 }
