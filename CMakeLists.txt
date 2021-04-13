@@ -13,7 +13,7 @@ set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(SOURCE_FILES
 	"main.cpp"
 	"Shader.cpp"
-	"Errors.cpp"
+	"Debug.cpp"
 	"Window.cpp"
 	"Game.cpp"
 	"Texture2D.cpp"

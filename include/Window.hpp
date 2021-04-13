@@ -8,6 +8,9 @@
 #include <array>
 #include <cstddef>
 
+/**
+* Game window using GLFW library.
+*/
 class Window final
 {
 public:

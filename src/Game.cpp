@@ -1,6 +1,6 @@
 #include "Game.hpp"
 
-#include "Errors.hpp"
+#include "Debug.hpp"
 #include "Shader.hpp"
 #include "Texture2D.hpp"
 #include "Input.hpp"
@@ -263,7 +263,7 @@ void Game::createAsteroid()
     asteroid->rotation = random::getFloat(0.0f, 360.0f);
     asteroid->angularVelocity = random::getFloat(ASTEROID_MIN_ROT_SPEED, ASTEROID_MAX_ROT_SPEED);
     float speed = random::getFloat(ASTEROID_MIN_SPEED, ASTEROID_MAX_SPEED);
-    float velocityAngle = random::getSizeT(3) * 90.0f + random::getFloat(ASTEROID_MIN_ANGLE, ASTEROID_MAX_ANGLE);
+    float velocityAngle = random::getIndex(3) * 90.0f + random::getFloat(ASTEROID_MIN_ANGLE, ASTEROID_MAX_ANGLE);
     asteroid->velocity = speed * geom::getDirection(velocityAngle);
     asteroid->bounds = {
         glm::vec2(0.5f, 0.0f), glm::vec2(1.0f, 0.5f), glm::vec2(0.75f, 1.0f),
@@ -314,15 +314,15 @@ void Game::moveObjectBack(const std::shared_ptr<GameObject>& gameObject)
     glm::vec2 size = gameObject->size;
     if (pos.x < -size.x)
     {
-        pos.x = SCR_WIDTH;
+        pos.x = SCR_SIZE.x;
     }
-    else if (pos.x > SCR_WIDTH)
+    else if (pos.x > SCR_SIZE.x)
     {
         pos.x = -size.x;
     }
     if (pos.y < -size.y)
     {
-        pos.y = SCR_HEIGHT;
+        pos.y = SCR_SIZE.y;
     }
     else if (pos.y > SCR_HEIGHT)
     {

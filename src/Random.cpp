@@ -25,15 +25,7 @@ float random::getFloat(float value1, float value2)
 	return value1 + getFloat() * (value2 - value1);
 }
 
-glm::vec2 random::getVec2(glm::vec2 vec1, glm::vec2 vec2)
-{
-	return glm::vec2(
-		getFloat(vec1.x, vec2.x),
-		getFloat(vec1.y, vec2.y)
-	);
-}
-
-std::size_t random::getSizeT(std::size_t max)
+std::size_t random::getIndex(std::size_t max)
 {
 	float randomFloat = getFloat();
 	if (randomFloat == 1.0f)

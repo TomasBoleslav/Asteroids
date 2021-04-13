@@ -7,6 +7,9 @@
 #include <array>
 #include <cstddef>
 
+/**
+* Stores input from the user.
+*/
 class Input final
 {
 public:

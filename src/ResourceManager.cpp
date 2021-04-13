@@ -2,7 +2,7 @@
 
 #include "Shader.hpp"
 #include "Texture2D.hpp"
-#include "Errors.hpp"
+#include "Debug.hpp"
 
 #include <stb_image.h>
 #include <glad/glad.h>

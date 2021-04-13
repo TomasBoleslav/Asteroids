@@ -1,7 +1,7 @@
 #include "Window.hpp"
 
 #include "Input.hpp"
-#include "Errors.hpp"
+#include "Debug.hpp"
 
 #include <stdexcept>
 

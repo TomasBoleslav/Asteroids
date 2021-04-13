@@ -1,6 +1,6 @@
 #include "Texture2D.hpp"
 
-#include "Errors.hpp"
+#include "Debug.hpp"
 
 #include <glad/glad.h>
 

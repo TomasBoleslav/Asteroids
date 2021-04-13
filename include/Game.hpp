@@ -24,7 +24,8 @@ private:
 
     const unsigned int SCR_WIDTH = 800;
     const unsigned int SCR_HEIGHT = 600;
-    const glm::vec2 SCR_CENTER = glm::vec2(SCR_WIDTH / 2.0f, SCR_HEIGHT / 2.0f);
+    const glm::vec2 SCR_SIZE = glm::vec2(SCR_WIDTH, SCR_HEIGHT);
+    const glm::vec2 SCR_CENTER = SCR_SIZE / 2.0f;
 
     const float UPDATES_PER_SEC = 60.0;
     const float UPDATE_INTERVAL = 1.0f / UPDATES_PER_SEC;
@@ -47,7 +48,7 @@ private:
 
     const float BULLET_SPEED = 400.0f;
     const glm::vec2 BULLET_SIZE = glm::vec2(3.0f, 10.0f);
-    const float BULLET_RANGE = std::min(SCR_WIDTH, SCR_HEIGHT);
+    const float BULLET_RANGE = std::min(SCR_SIZE.x, SCR_SIZE.y);
     const double BULLET_LIFETIME = BULLET_RANGE / BULLET_SPEED;
 
     const glm::vec2 LEVEL_ICON_SIZE = glm::vec2(16.0f, 20.0f);

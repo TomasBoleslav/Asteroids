@@ -1,11 +1,11 @@
-#include "Errors.hpp"
+#include "Debug.hpp"
 
 #include <glad/glad.h>
 
 #include <string>
 #include <iostream>
 
-bool err::LogCall(const char* function, const char* file, int line)
+bool debug::LogCall(const char* function, const char* file, int line)
 {
 	bool success = true;
 	unsigned int errorCode;

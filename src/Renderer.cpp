@@ -1,6 +1,6 @@
 #include "Renderer.hpp"
 
-#include "Errors.hpp"
+#include "Debug.hpp"
 #include "Shader.hpp"
 #include "Texture2D.hpp"
 #include "Geometry.hpp"

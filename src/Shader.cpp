@@ -1,6 +1,6 @@
 #include "Shader.hpp"
 
-#include "Errors.hpp"
+#include "Debug.hpp"
 
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>

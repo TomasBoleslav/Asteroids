@@ -5,21 +5,29 @@
 
 #include <vector>
 
+/**
+* Contains functions for easier random number generation.
+*/
 namespace random 
 {
+    // Set seed of random number generator.
+    // This function should be called to initialize the random namespace.
+    // If the given seed is zero then the seed is set randomly.
     void setSeed(unsigned int seed);
-    float getFloat();
-    float getFloat(float value1, float value2);
-    glm::vec2 getVec2(glm::vec2 vec1, glm::vec2 vec2);
-    std::size_t getSizeT(std::size_t max);  // TODO: rename to getIndex, return maximum value size - 1
 
+    // Get float in the interval [0, 1].
+    float getFloat();
+
+    // Get float between two values.
+    float getFloat(float value1, float value2);
+
+    // Get array index from 0 to size - 1.
+    std::size_t getIndex(std::size_t size);
+
+    // Choose one of two values.
     template<typename T>
     T choose(T value1, T value2);
-
-    template<typename T>
-    T chooseFromVector(const std::vector<T>& vector);
 }
-
 
 template<typename T>
 T random::choose(T value1, T value2)
@@ -29,13 +37,6 @@ T random::choose(T value1, T value2)
         return value1;
     }
     return value2;
-}
-
-template<typename T>
-T random::chooseFromVector(const std::vector<T>& vector)
-{
-    std::size_t index = getSizeT(vector.size() - 1);
-    return vector[index];
 }
 
 #endif
