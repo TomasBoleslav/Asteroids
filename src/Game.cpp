@@ -10,13 +10,11 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/mat4x4.hpp>
 #include <glm/vec2.hpp>
-#include <glm/gtc/constants.hpp>
+#include <glm/mat4x4.hpp>
 
 #include <stdexcept>
 #include <algorithm>
-#include <cstdlib>
 
 Game::Game() : m_level(1), m_state(GameState::Running)
 {
@@ -128,7 +126,7 @@ void Game::processInput()
     {
         shootBullet();
     }
-    m_player->processInput(); 
+    m_player->processInput();
 }
 
 void Game::render()
@@ -231,7 +229,7 @@ void Game::spawnAsteroids()
 
 void Game::handleCollisions()
 {
-    m_asteroids.erase(std::remove_if(m_asteroids.begin(), m_asteroids.end(),
+    removeObjectsIf(m_asteroids,
         [this](const std::shared_ptr<Asteroid>& asteroid)
         {
             for (auto it = m_bullets.begin(); it != m_bullets.end(); ++it)
@@ -244,7 +242,7 @@ void Game::handleCollisions()
             }
             return false;
         }
-        ), m_asteroids.end());
+    );
     for (auto&& asteroid : m_asteroids)
     {
         if (m_player->collidesWith(asteroid))
@@ -261,7 +259,7 @@ void Game::createAsteroid()
     asteroid->size = glm::vec2(ASTEROID_SIZE);
     asteroid->position = getAsteroidRandomPos(ASTEROID_SIZE);
     asteroid->rotation = random::getFloat(0.0f, 360.0f);
-    asteroid->angularVelocity = random::getFloat(ASTEROID_MIN_ROT_SPEED, ASTEROID_MAX_ROT_SPEED);
+    asteroid->rotationSpeed = random::getFloat(ASTEROID_MIN_ROT_SPEED, ASTEROID_MAX_ROT_SPEED);
     float speed = random::getFloat(ASTEROID_MIN_SPEED, ASTEROID_MAX_SPEED);
     float velocityAngle = random::getIndex(3) * 90.0f + random::getFloat(ASTEROID_MIN_ANGLE, ASTEROID_MAX_ANGLE);
     asteroid->velocity = speed * geom::getDirection(velocityAngle);
@@ -279,7 +277,7 @@ glm::vec2 Game::getAsteroidRandomPos(float size)
     return random::choose<glm::vec2>(
         glm::vec2(randomX, -size),  // top
         glm::vec2(-size, randomY)   // left
-    );
+        );
 }
 
 void Game::gameOver()

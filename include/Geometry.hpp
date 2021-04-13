@@ -32,7 +32,7 @@ namespace geom
     // Check if polygons intersect by checking line segments intersection (does not work for polygon inside polygon).
     bool polygonsIntersect(const std::vector<glm::vec2>& polygon1, const std::vector<glm::vec2>& polygon2);
 
-    // Get model matrix for normalized shape (coordinates between 0.0 and 1.0).
+    // Get model matrix for normalized shape (coordinates between 0.0 and 1.0) with the target size.
     glm::mat4 getModelMatrix(glm::vec2 position, glm::vec2 size, float rotation);
 
     // Transform polygon by given matrix.
@@ -40,6 +40,9 @@ namespace geom
 
     // Get a direction for given angle as a normalized vector.
     glm::vec2 getDirection(float angleDeg);
+
+    // Clamp angle between [0.0, 360.0] while preserving the direction.
+    float clampAngle(float angleDeg);
 }
 
 #endif

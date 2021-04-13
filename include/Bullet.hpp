@@ -13,6 +13,8 @@ public:
     glm::vec2 velocity;
 
     Bullet();
+
+    // Move the bullet.
     void update(float deltaTime) override;
 
     // Set the duration for which the bullet will exist.

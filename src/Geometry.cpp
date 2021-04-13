@@ -103,3 +103,16 @@ glm::vec2 geom::getDirection(float angleDeg)
         glm::sin(glm::radians(angleDeg))
     );
 }
+
+float geom::clampAngle(float angleDeg)
+{
+    while (angleDeg < 0.0f)
+    {
+        angleDeg += 360.0f;
+    }
+    while (angleDeg > 360.0f)
+    {
+        angleDeg -= 360.0f;
+    }
+    return angleDeg;
+}

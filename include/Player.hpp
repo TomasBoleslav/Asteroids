@@ -24,6 +24,7 @@ public:
     // Process input from keyboard and determine the next direction.
     void processInput();
 
+    // Move the player.
     virtual void update(float deltaTime) override;
 
     // Check if reload time is up.
@@ -34,8 +35,8 @@ public:
 
 private:
     Timer m_reloadTimer;
-    float m_angularVelocity;    // Angular velocity read from input.
-    float m_userForce;          // Force read from input.
+    float m_angularVelocity;    // Angular velocity that was read from input.
+    float m_userForce;          // Force that was read from input.
 
     glm::vec2 getBulletPosition(glm::vec2 bulletSize);
 };
