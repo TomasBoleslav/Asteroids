@@ -11,7 +11,7 @@ class Player : public GameObject
 {
 public:
     glm::vec2 velocity;
-    float forceValue;
+    float force;
     float turnSpeed;
     float decay;
     double reloadTime;
@@ -22,12 +22,12 @@ public:
     void processInput();
     virtual void update(float deltaTime) override;
     bool canShoot();
-    std::shared_ptr<Bullet> shoot(glm::vec2 bulletSize, float speed);
+    std::shared_ptr<Bullet> shoot(glm::vec2 bulletSize, float speed, float range);
 
 private:
-    Timer reloadTimer;
-    float angularVelocity;
-    float userForce;
+    Timer m_reloadTimer;
+    float m_angularVelocity;
+    float m_userForce;
 
     glm::vec2 getBulletPosition(glm::vec2 bulletSize);
 };

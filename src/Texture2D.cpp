@@ -37,6 +37,11 @@ const Texture2D::Settings& Texture2D::getSettings() const
     return m_settings;
 }
 
+glm::vec2 Texture2D::getSize()
+{
+    return glm::vec2(static_cast<float>(m_width), static_cast<float>(m_height));
+}
+
 unsigned int Texture2D::generateTexture(unsigned int width, unsigned int height, unsigned char* data, const Settings& settings) const
 {
     unsigned int textureID;

@@ -18,9 +18,8 @@
 #include <algorithm>
 #include <cstdlib>
 
-Game::Game() : timeToNextAsteroid(1.0f), asteroidsPerSec(5.0f), m_level(0)
+Game::Game() : m_level(1), m_state(GameState::Running)
 {
-    m_asteroidSizes = { 30.0, 50.0, 70.0 };
 }
 
 Game::~Game()
@@ -76,27 +75,28 @@ void Game::createPlayer()
 {
     m_player = std::make_shared<Player>();
     m_player->texture = ResourceManager::getTexture("ship");
-    m_player->size = glm::vec2(40.0f, 50.0f);
+    m_player->size = PLAYER_SIZE;
+    m_player->reloadTime = PLAYER_RELOAD_TIME;
+    m_player->force = PLAYER_FORCE;
+    m_player->decay = PLAYER_DECAY;
+    m_player->turnSpeed = PLAYER_TURN_SPEED;
     m_player->bounds = {
         glm::vec2(0.0f, 1.0f), glm::vec2(0.5f, 0.75f),
         glm::vec2(1.0f, 1.0f), glm::vec2(0.5f, 0.0f)
     };
-    m_player->reloadTime = 1.0f;
-    m_player->forceValue = 400.0f;
-    m_player->decay = 0.99f;
-    m_player->turnSpeed = 180.0f;
 }
 
 void Game::restartGame()
 {
-    m_state = GameState::Start;
-    m_stateTimer.start(TIME_BETWEEN_STATES);
-    m_level = 0;
+    m_level = 1;
     m_player->position = SCR_CENTER;
     m_player->velocity = glm::vec2(0.0f);
     m_player->rotation = 0.0f;
     m_asteroids.clear();
     m_bullets.clear();
+    spawnAsteroids();
+    m_state = GameState::Start;
+    m_stateTimer.start(TIME_BETWEEN_STATES);
 }
 
 void Game::gameLoop()
@@ -113,7 +113,7 @@ void Game::gameLoop()
             update(UPDATE_INTERVAL);
         }
         render();
-        glfwPollEvents();   // TODO: add to window
+        glfwPollEvents();
     }
 }
 
@@ -137,7 +137,6 @@ void Game::render()
     GL_CALL(glClear(GL_COLOR_BUFFER_BIT));
     auto background = ResourceManager::getTexture("background");
     m_renderer.drawQuad(background, glm::vec2(0.0f), glm::vec2(SCR_WIDTH, SCR_HEIGHT));
-
     if (m_state != GameState::Over)
     {
         m_player->draw(m_renderer);
@@ -150,7 +149,27 @@ void Game::render()
     {
         bullet->draw(m_renderer);
     }
+    renderLevelCount();
     m_window->swapBuffers();
+}
+
+void Game::renderLevelCount()
+{
+    auto texture = ResourceManager::getTexture("ship");
+    glm::vec2 pos = glm::vec2(0.0f);
+    for (size_t i = 0; i < m_level; i++)
+    {
+        if (i % LEVEL_ICONS_IN_ROW == 0)
+        {
+            pos.x = LEVEL_ICON_OFFSET;
+            pos.y += LEVEL_ICON_SIZE.y;
+        }
+        else
+        {
+            pos.x += LEVEL_ICON_SIZE.x;
+        }
+        m_renderer.drawQuad(texture, pos, LEVEL_ICON_SIZE, 0.0f, LEVEL_ICON_COLOR);
+    }
 }
 
 void Game::determineState()
@@ -174,18 +193,16 @@ void Game::determineState()
 
 void Game::update(float deltaTime)
 {
-    if (m_state == GameState::Running)
+    if (m_state != GameState::Running)
     {
-        handleCollisions();
-        if (m_asteroids.size() == 0)
-        {
-            //increaseLevel();
-        }
+        return;
     }
-    if (m_state != GameState::Over)
+    handleCollisions();
+    if (m_asteroids.size() == 0)
     {
-        m_player->update(deltaTime);
+        increaseLevel();
     }
+    m_player->update(deltaTime);
     for (auto&& asteroid : m_asteroids)
     {
         asteroid->update(deltaTime);
@@ -205,8 +222,7 @@ void Game::increaseLevel()
 
 void Game::spawnAsteroids()
 {
-    std::size_t count = ASTEROID_MIN_COUNT + m_level * ASTEROID_COUNT_INCREASE;
-    count = std::min(count, ASTEROID_MAX_COUNT); // TODO: nechat neomezene asteroidu?
+    std::size_t count = m_level * ASTEROID_MIN_COUNT;
     for (size_t i = 0; i < count; i++)
     {
         createAsteroid();
@@ -240,16 +256,15 @@ void Game::handleCollisions()
 
 void Game::createAsteroid()
 {
-    std::shared_ptr<Asteroid> asteroid = std::make_shared<Asteroid>();
-    float size = random::chooseFromVector<float>(m_asteroidSizes);
+    auto asteroid = std::make_shared<Asteroid>();
+    asteroid->texture = ResourceManager::getTexture("asteroid");
+    asteroid->size = glm::vec2(ASTEROID_SIZE);
+    asteroid->position = getAsteroidRandomPos(ASTEROID_SIZE);
+    asteroid->rotation = random::getFloat(0.0f, 360.0f);
+    asteroid->angularVelocity = random::getFloat(ASTEROID_MIN_ROT_SPEED, ASTEROID_MAX_ROT_SPEED);
     float speed = random::getFloat(ASTEROID_MIN_SPEED, ASTEROID_MAX_SPEED);
     float velocityAngle = random::getSizeT(3) * 90.0f + random::getFloat(ASTEROID_MIN_ANGLE, ASTEROID_MAX_ANGLE);
-    asteroid->texture = ResourceManager::getTexture("asteroid");
-    asteroid->size = glm::vec2(size);
-    asteroid->position = getAsteroidRandomPos(size);
-    asteroid->rotation = random::getFloat(0.0f, 360.0f);
     asteroid->velocity = speed * geom::getDirection(velocityAngle);
-    asteroid->angularVelocity = random::getFloat(ASTEROID_MIN_ROT_SPEED, ASTEROID_MAX_ROT_SPEED);
     asteroid->bounds = {
         glm::vec2(0.5f, 0.0f), glm::vec2(1.0f, 0.5f), glm::vec2(0.75f, 1.0f),
         glm::vec2(0.25f, 1.0f), glm::vec2(0.0f, 0.75f), glm::vec2(0.15f, 0.25f)
@@ -267,50 +282,30 @@ glm::vec2 Game::getAsteroidRandomPos(float size)
     );
 }
 
-template<typename T>
-void Game::removeStrayObjects(std::vector<std::shared_ptr<T>>& objects)
-{
-    objects.erase(std::remove_if(objects.begin(), objects.end(),
-        [this](const std::shared_ptr<T>& gameObject)
-        {
-            return objectLeftWindow(gameObject);
-        }
-    ), objects.end());
-}
-
-bool Game::objectLeftWindow(std::shared_ptr<GameObject> gameObject)
-{
-    glm::vec2 pos = gameObject->position;
-    glm::vec2 windowMiddle = glm::vec2(SCR_WIDTH / 2, SCR_HEIGHT / 2);
-    return glm::length(pos - windowMiddle) > 2 * std::max(SCR_WIDTH, SCR_HEIGHT);
-}
-
 void Game::gameOver()
 {
     m_state = GameState::Over;
     m_stateTimer.start(TIME_BETWEEN_STATES);
 }
 
-template<typename T, typename F>
-void Game::forObjects(const std::vector<std::shared_ptr<T>>& objects, F function)
-{
-    std::for_each(objects.begin(), objects.end(), function);
-}
-
 void Game::shootBullet()
 {
-    auto bullet = m_player->shoot(glm::vec2(4.0, 20.0), BULLET_SPEED);
+    auto bullet = m_player->shoot(BULLET_SIZE, BULLET_SPEED, BULLET_RANGE);
     m_bullets.push_back(bullet);
 }
 
 void Game::handleStrayObjects()
 {
+    removeObjectsIf(m_bullets, [](const std::shared_ptr<Bullet>& bullet) { return bullet->isOutsideRange(); });
+    for (auto&& bullet : m_bullets)
+    {
+        moveObjectBack(bullet);
+    }
     for (auto&& asteroid : m_asteroids)
     {
         moveObjectBack(asteroid);
     }
     moveObjectBack(m_player);
-    removeStrayObjects(m_bullets);
 }
 
 void Game::moveObjectBack(const std::shared_ptr<GameObject>& gameObject)

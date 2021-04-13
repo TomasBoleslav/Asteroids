@@ -11,8 +11,8 @@
 #include <glm/gtc/constants.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-Player::Player() : velocity(0.0f), forceValue(0.0f), turnSpeed(0.0f), decay(0.0f), reloadTime(1.0),
-	angularVelocity(0.0f), userForce(0.0f)
+Player::Player() : velocity(0.0f), force(0.0f), turnSpeed(0.0f), decay(0.0f), reloadTime(0.0),
+	m_angularVelocity(0.0f), m_userForce(0.0f)
 {
 }
 
@@ -20,47 +20,48 @@ void Player::processInput()
 {
 	if (Input::isKeyPressed(GLFW_KEY_LEFT))
 	{
-		angularVelocity = -turnSpeed;
+		m_angularVelocity = -turnSpeed;
 	}
 	if (Input::isKeyPressed(GLFW_KEY_RIGHT))
 	{
-		angularVelocity = turnSpeed;
+		m_angularVelocity = turnSpeed;
 	}
 	if (Input::isKeyPressed(GLFW_KEY_UP))
 	{
-		userForce = forceValue;
+		m_userForce = force;
 	}
 }
 
 void Player::update(float deltaTime)
 {
-	rotation += angularVelocity * deltaTime;
-	glm::vec2 acceleration = geom::getDirection(rotation - 90.0f) * userForce;
+	rotation += m_angularVelocity * deltaTime;
+	glm::vec2 acceleration = geom::getDirection(rotation - 90.0f) * m_userForce;
 	velocity += acceleration * deltaTime;
 	velocity *= decay;
 	position += velocity * deltaTime;
-	angularVelocity = 0.0f;
-	userForce = 0.0f;
+	m_angularVelocity = 0.0f;
+	m_userForce = 0.0f;
 }
 
 bool Player::canShoot()
 {
-	return reloadTimer.finished();
+	return m_reloadTimer.finished();
 }
 
-std::shared_ptr<Bullet> Player::shoot(glm::vec2 bulletSize, float speed)
+std::shared_ptr<Bullet> Player::shoot(glm::vec2 bulletSize, float speed, float range)
 {
   	auto bullet = std::make_shared<Bullet>();
 	bullet->position = getBulletPosition(bulletSize);
 	glm::vec2 bulletDir = geom::getDirection(rotation - 90.0f);
 	bullet->velocity = (speed + glm::length(velocity)) * bulletDir;
 	bullet->size = bulletSize;
+	bullet->rotation = rotation;
+	bullet->setRange(range);
 	bullet->bounds = {
 		glm::vec2(0.0f, 0.0f), glm::vec2(1.0f, 0.0f),
 		glm::vec2(1.0f, 1.0f), glm::vec2(0.0f, 1.0f)
 	};
-	bullet->rotation = rotation;
-	reloadTimer.start(reloadTime);
+	m_reloadTimer.start(reloadTime);
 	return bullet;
 }
 

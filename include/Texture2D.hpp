@@ -1,6 +1,8 @@
 #ifndef TEXTURE2D_HPP
 #define TEXTURE2D_HPP
 
+#include <glm/vec2.hpp>
+
 class Texture2D final
 {
 public:
@@ -27,6 +29,7 @@ public:
 
     unsigned int getID() const;
     const Settings& getSettings() const;
+    glm::vec2 getSize();
 
 private:
     unsigned int m_textureID;
