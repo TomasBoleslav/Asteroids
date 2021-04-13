@@ -1,14 +1,11 @@
 #include "ResourceManager.hpp"
 
-#include "Shader.hpp"
-#include "Texture2D.hpp"
 #include "Debug.hpp"
 
 #include <stb_image.h>
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <string>
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
@@ -20,8 +17,7 @@ void ResourceManager::loadShader(const std::string& name, const std::string& ver
 {
     if (s_shaders.find(name) != s_shaders.end())
     {
-        throw std::runtime_error("Shader with name '" + name + "' already exists.");
-        // TODO: throw
+        throw std::logic_error("Shader with name '" + name + "' already exists.");
     }
     std::string vertexSource = readFile(vertexPath);
     std::string fragmentSource = readFile(fragmentPath);
@@ -33,14 +29,12 @@ void ResourceManager::loadTexture(const std::string& name, const std::string& pa
     if (s_textures.find(name) != s_textures.end())
     {
         throw std::logic_error("Texture with name '" + name + "' already exists.");
-        // TODO: throw
     }
     int width, height, channelsCount;
     unsigned char* data = stbi_load(path.c_str(), &width, &height, &channelsCount, 0);
     if (!data)
     {
         throw std::ios_base::failure("Failed to load texture at location '" + path +"'.");
-        // TODO: throw
     }
     Texture2D::Settings settings;
     if (alpha)
@@ -56,8 +50,7 @@ void ResourceManager::addTexture(const std::string& name, std::shared_ptr<Textur
 {
     if (s_textures.find(name) != s_textures.end())
     {
-        throw std::runtime_error("Texture with name '" + name + "' already exists.");
-        // TODO: throw
+        throw std::logic_error("Texture with name '" + name + "' already exists.");
     }
     s_textures[name] = texture;
 }

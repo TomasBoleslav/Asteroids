@@ -5,6 +5,7 @@
 
 #include <glm/vec2.hpp>
 
+
 class Asteroid : public GameObject
 {
 public:

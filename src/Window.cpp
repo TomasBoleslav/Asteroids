@@ -32,13 +32,11 @@ Window::Window(unsigned int width, unsigned int height, const std::string& title
     if (!m_window)
     {
         throw std::runtime_error("Failed to create GLFW window.");
-        // TODO: throw
     }
     glfwMakeContextCurrent(m_window);
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         throw std::runtime_error("Failed to initialize GLAD.");
-        // TODO: throw
     }
     glfwSetKeyCallback(m_window, keyCallback);
     glfwSetFramebufferSizeCallback(m_window, frameBufferSizeCallback);
