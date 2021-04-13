@@ -13,7 +13,7 @@ void Timer::start(double duration)
     m_startTime = glfwGetTime();
 }
 
-bool Timer::finished()
+bool Timer::finished() const
 {
     return m_startTime + m_duration <= glfwGetTime();
 }

@@ -22,7 +22,7 @@ public:
     void processInput();
     virtual void update(float deltaTime) override;
     bool canShoot();
-    std::shared_ptr<Bullet> shoot(glm::vec2 bulletSize, float speed, float range);
+    std::shared_ptr<Bullet> shoot(glm::vec2 bulletSize, float speed, double lifetime);
 
 private:
     Timer m_reloadTimer;

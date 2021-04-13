@@ -6,7 +6,7 @@ class Timer
 public:
     Timer();
     void start(double duration);
-    bool finished();
+    bool finished() const;
 private:
     double m_duration;
     double m_startTime;

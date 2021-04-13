@@ -290,13 +290,13 @@ void Game::gameOver()
 
 void Game::shootBullet()
 {
-    auto bullet = m_player->shoot(BULLET_SIZE, BULLET_SPEED, BULLET_RANGE);
+    auto bullet = m_player->shoot(BULLET_SIZE, BULLET_SPEED, BULLET_LIFETIME);
     m_bullets.push_back(bullet);
 }
 
 void Game::handleStrayObjects()
 {
-    removeObjectsIf(m_bullets, [](const std::shared_ptr<Bullet>& bullet) { return bullet->isOutsideRange(); });
+    removeObjectsIf(m_bullets, [](const std::shared_ptr<Bullet>& bullet) { return bullet->isDestroyed(); });
     for (auto&& bullet : m_bullets)
     {
         moveObjectBack(bullet);

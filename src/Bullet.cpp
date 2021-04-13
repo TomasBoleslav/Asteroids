@@ -8,20 +8,15 @@ Bullet::Bullet() : velocity(0.0f), m_distanceLeft(0.0f)
 
 void Bullet::update(float deltaTime)
 {
-    glm::vec2 shift = velocity * deltaTime;
-    if (m_distanceLeft >= 0.0f)
-    {
-        m_distanceLeft -= glm::length(shift);
-    }
     position += velocity * deltaTime;
 }
 
-void Bullet::setRange(float range)
+void Bullet::setLifetime(double lifetime)
 {
-    m_distanceLeft = range;
+    m_lifeTimer.start(lifetime);
 }
 
-bool Bullet::isOutsideRange() const
+bool Bullet::isDestroyed() const
 {
-    return m_distanceLeft < 0.0f;
+    return m_lifeTimer.finished();
 }
