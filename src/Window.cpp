@@ -4,6 +4,7 @@
 #include "Debug.hpp"
 
 #include <stdexcept>
+#include <cstddef>
 
 void frameBufferSizeCallback(GLFWwindow* window, int width, int height)
 {
@@ -12,7 +13,7 @@ void frameBufferSizeCallback(GLFWwindow* window, int width, int height)
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
-    if (0 <= key && key < Input::KEY_COUNT)
+    if (0 <= key && static_cast<std::size_t>(key) < Input::KEY_COUNT)
     {
         if (action == GLFW_PRESS)
         {
