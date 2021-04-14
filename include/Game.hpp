@@ -22,6 +22,7 @@ public:
     Game();
     ~Game();
 
+    // Initializes the game and starts the game loop.
     void run();
 
 private:
@@ -34,7 +35,7 @@ private:
     const glm::vec2 SCR_CENTER = SCR_SIZE / 2.0f;
 
     // Time constants
-    const float UPDATES_PER_SEC = 60.0;
+    const float UPDATES_PER_SEC = 60.0f;
     const float UPDATE_INTERVAL = 1.0f / UPDATES_PER_SEC;
     const double TIME_BETWEEN_STATES = 1.0;
 
@@ -70,7 +71,7 @@ private:
     std::unique_ptr<Window> m_window;
     std::size_t m_level;    // Current level
     GameState m_state;      // Current state
-    Timer m_stateTimer;
+    Timer m_stateTimer;     // Timer for delay between states
     Renderer m_renderer;
     std::shared_ptr<Player> m_player;
     std::vector<std::shared_ptr<Asteroid>> m_asteroids;
@@ -86,25 +87,24 @@ private:
 
     // Game loop
     void gameLoop();
-    void determineState();
+    void determineState();          // Determines the next state using m_stateTimer
     void processInput();
     void shootBullet();
     void update(float deltaTime);
-    void handleCollisions();
     void render();
     void renderLevelCount();
-    void gameOver();
 
-    // Asteroid spawning
-    void increaseLevel();
-    void spawnAsteroids();
-    void createAsteroid();
-    glm::vec2 getAsteroidRandomPos(float size);
-
-    // Remove or rollover stray objects
+    // Update of objects
+    void handleCollisions();
     void handleStrayObjects();
-    void moveObjectBack(const std::shared_ptr<GameObject>& gameObject);
-    void removeBulletsOutsideRange();
+    void moveObjectBack(const std::shared_ptr<GameObject>& gameObject); // Moves a stray object to the other side of screen
+
+    // State change
+    void gameOver();
+    void increaseLevel();       // Increase level and spawn new asteroids
+    void spawnAsteroids();      // Spawns asteroids according to current level
+    void createAsteroid();      // Creates a new asteroid and places it randomly outside the screen
+    glm::vec2 getAsteroidRandomPos(float size);
 
     // Remove all objects from vector satisfying the given condition.
     template<typename T, typename F>

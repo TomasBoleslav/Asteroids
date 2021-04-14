@@ -3,9 +3,15 @@
 
 #include <glm/vec2.hpp>
 
+/**
+* Represents a texture.
+* Acts only as an observer (does not contain any image data).
+* Generated textures should be given to ResourceManager which will free them correctly.
+*/
 class Texture2D final
 {
 public:
+    // Settings for texture generation.
     struct Settings final
     {
         unsigned int internalFormat;
@@ -17,26 +23,29 @@ public:
 
         Settings();
     };
-    Texture2D() = delete;
-    Texture2D(const Texture2D&) = delete;
-    Texture2D& operator=(const Texture2D&) = delete;
+    Texture2D();
 
-    Texture2D(unsigned int width, unsigned int height, unsigned char* data);
-    Texture2D(unsigned int width, unsigned int height, unsigned char* data, const Settings& settings);
+    // Generate a new texture with the given data and default settings.
+    void generate(unsigned int width, unsigned int height, unsigned char* data);
 
+    // Generate a new texture with the given data and settings.
+    void generate(unsigned int width, unsigned int height, unsigned char* data, const Settings& settings);
+
+    // Binds the texture for the next draw call.
     void bind() const;
+
     void unbind() const;
 
     unsigned int getID() const;
-    const Settings& getSettings() const;
-    glm::vec2 getSize();
+
+    // Check if ID of this texture is valid (a texture with this ID was created).
+    // This will not work if the texture was freed manually or by ResourceManager.
+    bool isValid() const;
 
 private:
     unsigned int m_textureID;
-    unsigned int m_width, m_height;
-    Settings m_settings;
 
-    unsigned int generateTexture(unsigned int width, unsigned int height, unsigned char* data, const Settings& settings) const;
+    unsigned int createTexture(unsigned int width, unsigned int height, unsigned char* data, const Settings& settings) const;
 };
 
 #endif

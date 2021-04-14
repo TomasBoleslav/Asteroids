@@ -9,7 +9,11 @@
 #include <sstream>
 #include <stdexcept>
 
-Shader::Shader(const std::string& vertexSource, const std::string& fragmentSource)
+Shader::Shader() : m_programID(0)
+{
+}
+
+void Shader::generate(const std::string& vertexSource, const std::string& fragmentSource)
 {
     unsigned int vertexID = compileShader(vertexSource, GL_VERTEX_SHADER, "vertex");
     unsigned int fragmentID = compileShader(fragmentSource, GL_FRAGMENT_SHADER, "fragment");
@@ -38,12 +42,6 @@ void Shader::setVec3(const std::string& name, const glm::vec3& vec) const
 {
     GL_CALL(int location = glGetUniformLocation(m_programID, name.c_str()));
     GL_CALL(glUniform3f(location, vec.x, vec.y, vec.z));
-}
-
-void Shader::setInt(const std::string& name, int value) const
-{
-    GL_CALL(int location = glGetUniformLocation(m_programID, name.c_str()));
-    GL_CALL(glUniform1i(location, value));
 }
 
 unsigned int Shader::getID() const
@@ -82,8 +80,7 @@ void Shader::checkShaderCompileErrors(unsigned int shaderID, unsigned int type, 
 
         std::string infoLog(logLength, '\0');
         GL_CALL(glGetShaderInfoLog(shaderID, logLength, nullptr, &infoLog[0]));
-        throw std::runtime_error("Failed to compile " + typeName + " shader:\n" + infoLog);
-        // TODO: throw
+        throw std::logic_error("Failed to compile " + typeName + " shader:\n" + infoLog);
     }
 }
 
@@ -98,7 +95,6 @@ void Shader::checkProgramLinkingErrors(unsigned int programID) const
 
         std::string infoLog(logLength, '\0');
         GL_CALL(glGetProgramInfoLog(programID, logLength, nullptr, &infoLog[0]));
-        throw std::runtime_error("Failed to link program:\n" + infoLog);
-        // TODO: throw
+        throw std::logic_error("Failed to link program:\n" + infoLog);
     }
 }

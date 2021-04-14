@@ -9,8 +9,8 @@
 */
 namespace debug
 {
-	// Check for OpenGL errors caused after calling the given function and print them to std::err.
-	bool LogCall(const char* function, const char* file, int line);
+    // Check for OpenGL errors caused after calling the given function and print them to std::err.
+    bool LogCall(const char* function, const char* file, int line);
 }
 
 // Call an OpenGL function and check for errors.

@@ -7,21 +7,28 @@
 #include <string>
 #include <unordered_map>
 
+/**
+* Represents a GLSL shader program for drawing with a graphics card.
+* Acts as an observer, ResourceManager will free generated shaders correctly.
+*/
 class Shader final
 {
 public:
-    Shader() = delete;
-    Shader(Shader&& other) = delete;
-    Shader& operator=(Shader&& other) = delete;
+    Shader();
 
-    Shader(const std::string& vertexSource, const std::string& fragmentSource);
-    
+    // Generate a shader from vertex shader and fragment shader source code.
+    // Throws std::logic_error if the shader compilation failed.
+    void generate(const std::string& vertexSource, const std::string& fragmentSource);
+
+    // Use program for the next draw call.
     void use() const;
     void unuse() const;
 
+    // Set matrix4x4 uniform.
     void setMat4(const std::string& name, const glm::mat4& mat) const;
+
+    // Set vector3 uniform.
     void setVec3(const std::string& name, const glm::vec3& vec) const;
-    void setInt(const std::string& name, int value) const;
 
     unsigned int getID() const;
 

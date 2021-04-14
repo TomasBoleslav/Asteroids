@@ -64,8 +64,8 @@ void Game::loadResources()
 void Game::setCommonUniforms()
 {
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(SCR_WIDTH), static_cast<float>(SCR_HEIGHT), 0.0f, -1.0f, 1.0f);
-    ResourceManager::getShader("simple")->use();
-    ResourceManager::getShader("simple")->setMat4("u_projection", projection);
+    ResourceManager::getShader("simple").use();
+    ResourceManager::getShader("simple").setMat4("u_projection", projection);
 }
 
 void Game::createPlayer()
@@ -114,61 +114,6 @@ void Game::gameLoop()
     }
 }
 
-void Game::processInput()
-{
-    if (Input::isKeyPressed(GLFW_KEY_ESCAPE))
-    {
-        m_window->setToClose();
-        return;
-    }
-    if (Input::isKeyPressed(GLFW_KEY_SPACE) && m_state == GameState::Running && m_player->canShoot())
-    {
-        shootBullet();
-    }
-    m_player->processInput();
-}
-
-void Game::render()
-{
-    GL_CALL(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
-    GL_CALL(glClear(GL_COLOR_BUFFER_BIT));
-    auto background = ResourceManager::getTexture("background");
-    m_renderer.drawQuad(background, glm::vec2(0.0f), glm::vec2(SCR_WIDTH, SCR_HEIGHT));
-    if (m_state != GameState::Over)
-    {
-        m_player->draw(m_renderer);
-    }
-    for (auto&& asteroid : m_asteroids)
-    {
-        asteroid->draw(m_renderer);
-    }
-    for (auto&& bullet : m_bullets)
-    {
-        bullet->draw(m_renderer);
-    }
-    renderLevelCount();
-    m_window->swapBuffers();
-}
-
-void Game::renderLevelCount()
-{
-    auto texture = ResourceManager::getTexture("ship");
-    glm::vec2 pos = glm::vec2(0.0f);
-    for (size_t i = 0; i < m_level; i++)
-    {
-        if (i % LEVEL_ICONS_IN_ROW == 0)
-        {
-            pos.x = LEVEL_ICON_OFFSET;
-            pos.y += LEVEL_ICON_SIZE.y;
-        }
-        else
-        {
-            pos.x += LEVEL_ICON_SIZE.x;
-        }
-        m_renderer.drawQuad(texture, pos, LEVEL_ICON_SIZE, 0.0f, LEVEL_ICON_COLOR);
-    }
-}
-
 void Game::determineState()
 {
     switch (m_state)
@@ -186,6 +131,26 @@ void Game::determineState()
         }
         break;
     }
+}
+
+void Game::processInput()
+{
+    if (Input::isKeyPressed(GLFW_KEY_ESCAPE))
+    {
+        m_window->setToClose();
+        return;
+    }
+    if (Input::isKeyPressed(GLFW_KEY_SPACE) && m_state == GameState::Running && m_player->canShoot())
+    {
+        shootBullet();
+    }
+    m_player->processInput();
+}
+
+void Game::shootBullet()
+{
+    auto bullet = m_player->shoot(BULLET_SIZE, BULLET_SPEED, BULLET_LIFETIME);
+    m_bullets.push_back(bullet);
 }
 
 void Game::update(float deltaTime)
@@ -211,18 +176,44 @@ void Game::update(float deltaTime)
     handleStrayObjects();
 }
 
-void Game::increaseLevel()
+void Game::render()
 {
-    ++m_level;
-    spawnAsteroids();
+    GL_CALL(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
+    GL_CALL(glClear(GL_COLOR_BUFFER_BIT));
+    const Texture2D& background = ResourceManager::getTexture("background");
+    m_renderer.drawQuad(background, glm::vec2(0.0f), glm::vec2(SCR_WIDTH, SCR_HEIGHT));
+    if (m_state != GameState::Over)
+    {
+        m_player->draw(m_renderer);
+    }
+    for (auto&& asteroid : m_asteroids)
+    {
+        asteroid->draw(m_renderer);
+    }
+    for (auto&& bullet : m_bullets)
+    {
+        bullet->draw(m_renderer);
+    }
+    renderLevelCount();
+    m_window->swapBuffers();
 }
 
-void Game::spawnAsteroids()
+void Game::renderLevelCount()
 {
-    std::size_t count = m_level * ASTEROID_MIN_COUNT;
-    for (size_t i = 0; i < count; i++)
+    const Texture2D& texture = ResourceManager::getTexture("ship");
+    glm::vec2 pos = glm::vec2(0.0f);
+    for (size_t i = 0; i < m_level; i++)
     {
-        createAsteroid();
+        if (i % LEVEL_ICONS_IN_ROW == 0)
+        {
+            pos.x = LEVEL_ICON_OFFSET;
+            pos.y += LEVEL_ICON_SIZE.y;
+        }
+        else
+        {
+            pos.x += LEVEL_ICON_SIZE.x;
+        }
+        m_renderer.drawQuad(texture, pos, LEVEL_ICON_SIZE, 0.0f, LEVEL_ICON_COLOR);
     }
 }
 
@@ -249,46 +240,6 @@ void Game::handleCollisions()
             gameOver();
         }
     }
-}
-
-void Game::createAsteroid()
-{
-    auto asteroid = std::make_shared<Asteroid>();
-    asteroid->texture = ResourceManager::getTexture("asteroid");
-    asteroid->size = glm::vec2(ASTEROID_SIZE);
-    asteroid->position = getAsteroidRandomPos(ASTEROID_SIZE);
-    asteroid->rotation = rnd::getFloat(0.0f, 360.0f);
-    asteroid->rotationSpeed = rnd::getFloat(ASTEROID_MIN_ROT_SPEED, ASTEROID_MAX_ROT_SPEED);
-    float speed = rnd::getFloat(ASTEROID_MIN_SPEED, ASTEROID_MAX_SPEED);
-    float velocityAngle = rnd::getIndex(3) * 90.0f + rnd::getFloat(ASTEROID_MIN_ANGLE, ASTEROID_MAX_ANGLE);
-    asteroid->velocity = speed * geom::getDirection(velocityAngle);
-    asteroid->bounds = {
-        glm::vec2(0.5f, 0.0f), glm::vec2(1.0f, 0.5f), glm::vec2(0.75f, 1.0f),
-        glm::vec2(0.25f, 1.0f), glm::vec2(0.0f, 0.75f), glm::vec2(0.15f, 0.25f)
-    };
-    m_asteroids.push_back(asteroid);
-}
-
-glm::vec2 Game::getAsteroidRandomPos(float size)
-{
-    float randomX = rnd::getFloat(-size, SCR_WIDTH + size);
-    float randomY = rnd::getFloat(-size, SCR_HEIGHT + size);
-    return rnd::choose<glm::vec2>(
-        glm::vec2(randomX, -size),  // top
-        glm::vec2(-size, randomY)   // left
-        );
-}
-
-void Game::gameOver()
-{
-    m_state = GameState::Over;
-    m_stateTimer.start(TIME_BETWEEN_STATES);
-}
-
-void Game::shootBullet()
-{
-    auto bullet = m_player->shoot(BULLET_SIZE, BULLET_SPEED, BULLET_LIFETIME);
-    m_bullets.push_back(bullet);
 }
 
 void Game::handleStrayObjects()
@@ -328,3 +279,51 @@ void Game::moveObjectBack(const std::shared_ptr<GameObject>& gameObject)
     gameObject->position = pos;
 }
 
+void Game::gameOver()
+{
+    m_state = GameState::Over;
+    m_stateTimer.start(TIME_BETWEEN_STATES);
+}
+
+void Game::increaseLevel()
+{
+    ++m_level;
+    spawnAsteroids();
+}
+
+void Game::spawnAsteroids()
+{
+    std::size_t count = m_level * ASTEROID_MIN_COUNT;
+    for (size_t i = 0; i < count; i++)
+    {
+        createAsteroid();
+    }
+}
+
+void Game::createAsteroid()
+{
+    auto asteroid = std::make_shared<Asteroid>();
+    asteroid->texture = ResourceManager::getTexture("asteroid");
+    asteroid->size = glm::vec2(ASTEROID_SIZE);
+    asteroid->position = getAsteroidRandomPos(ASTEROID_SIZE);
+    asteroid->rotation = rnd::getFloat(0.0f, 360.0f);
+    asteroid->rotationSpeed = rnd::getFloat(ASTEROID_MIN_ROT_SPEED, ASTEROID_MAX_ROT_SPEED);
+    float speed = rnd::getFloat(ASTEROID_MIN_SPEED, ASTEROID_MAX_SPEED);
+    float velocityAngle = rnd::getInt(3) * 90.0f + rnd::getFloat(ASTEROID_MIN_ANGLE, ASTEROID_MAX_ANGLE);
+    asteroid->velocity = speed * geom::getDirection(velocityAngle);
+    asteroid->bounds = {
+        glm::vec2(0.5f, 0.0f), glm::vec2(1.0f, 0.5f), glm::vec2(0.75f, 1.0f),
+        glm::vec2(0.25f, 1.0f), glm::vec2(0.0f, 0.75f), glm::vec2(0.15f, 0.25f)
+    };
+    m_asteroids.push_back(asteroid);
+}
+
+glm::vec2 Game::getAsteroidRandomPos(float size)
+{
+    float randomX = rnd::getFloat(-size, SCR_WIDTH + size);
+    float randomY = rnd::getFloat(-size, SCR_HEIGHT + size);
+    return rnd::choose<glm::vec2>(
+        glm::vec2(randomX, -size),  // top
+        glm::vec2(-size, randomY)   // left
+        );
+}

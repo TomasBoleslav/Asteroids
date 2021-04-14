@@ -17,8 +17,7 @@ int geom::orientation(glm::vec2 p, glm::vec2 q, glm::vec2 r)
 {
     // See https://www.geeksforgeeks.org/orientation-3-ordered-points/
     // for details of below formula.
-    int val = (q.y - p.y) * (r.x - q.x) -
-        (q.x - p.x) * (r.y - q.y);
+    int val = static_cast<int>((q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y));
 
     if (val == 0) return 0;  // colinear
 
@@ -76,10 +75,13 @@ bool geom::polygonsIntersect(const std::vector<glm::vec2>& polygon1, const std::
 glm::mat4 geom::getModelMatrix(glm::vec2 position, glm::vec2 size, float rotation)
 {
     glm::mat4 model = glm::mat4(1.0f);
+    // Translate
     model = glm::translate(model, glm::vec3(position, 0.0f));
+    // Rotate around center
     model = glm::translate(model, glm::vec3(0.5f * size.x, 0.5f * size.y, 0.0f));
     model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 0.0f, 1.0f));
     model = glm::translate(model, glm::vec3(-0.5f * size.x, -0.5f * size.y, 0.0f));
+    // Scale
     model = glm::scale(model, glm::vec3(size, 1.0f));
     return model;
 }

@@ -4,7 +4,7 @@
 /**
 * Timer that can be used as stopwatch.
 */
-class Timer
+class Timer final
 {
 public:
     Timer();

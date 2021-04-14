@@ -10,36 +10,41 @@
 
 #include <array>
 
-Renderer::Renderer() : m_quadVAO(0), m_shader(nullptr)
+Renderer::Renderer() : m_quadVAO(0)
 {
 }
 
-void Renderer::init(std::shared_ptr<Shader> shader)
+Renderer::~Renderer()
+{
+    GL_CALL(glDeleteVertexArrays(1, &m_quadVAO));
+}
+
+void Renderer::init(const Shader& shader)
 {
     m_shader = shader;
     std::array<Vertex, VERTEX_COUNT> vertices = getVertices();
     m_quadVAO = createQuadVAO(vertices.data());
-    if (!ResourceManager::getTexture("white"))
+    if (!ResourceManager::hasTexture("white"))
     {
-        auto whiteTexture = createWhiteTexture();
+        Texture2D whiteTexture = createWhiteTexture();
         ResourceManager::addTexture("white", whiteTexture);
     }
 }
 
-void Renderer::drawQuad(const std::shared_ptr<Texture2D>& texture, glm::vec2 position, glm::vec2 size,
+void Renderer::drawQuad(const Texture2D& texture, glm::vec2 position, glm::vec2 size,
     float rotation, glm::vec3 color) const
 {
-    m_shader->use();
+    m_shader.use();
     glm::mat4 model = geom::getModelMatrix(position, size, rotation);
-    m_shader->setMat4("u_model", model);
-    m_shader->setVec3("u_color", color);
-    if (texture)
+    m_shader.setMat4("u_model", model);
+    m_shader.setVec3("u_color", color);
+    if (texture.isValid())
     {
-        texture->bind();
+        texture.bind();
     }
     else
     {
-        ResourceManager::getTexture("white")->bind();
+        ResourceManager::getTexture("white").bind();
     }
     GL_CALL(glBindVertexArray(m_quadVAO));
     GL_CALL(glDrawArrays(GL_TRIANGLES, 0, VERTEX_COUNT));
@@ -79,13 +84,15 @@ unsigned int Renderer::createQuadVAO(const void* data) const
     return VAO;
 }
 
-std::shared_ptr<Texture2D> Renderer::createWhiteTexture() const
+Texture2D Renderer::createWhiteTexture() const
 {
+    Texture2D texture;
     Texture2D::Settings settings;
     settings.internalFormat = GL_RGBA8;
     settings.format = GL_RGBA;
     settings.wrapS = settings.wrapT = GL_REPEAT;
     settings.filterMin = settings.filterMag = GL_NEAREST;
     unsigned char data[4] = { 255, 255, 255, 255 };
-    return std::make_shared<Texture2D>(1, 1, data);
+    texture.generate(1, 1, data);
+    return texture;
 }

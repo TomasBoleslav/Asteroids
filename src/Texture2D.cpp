@@ -4,16 +4,18 @@
 
 #include <glad/glad.h>
 
-Texture2D::Texture2D(unsigned int width, unsigned int height, unsigned char* data)
-    : m_width(width), m_height(height), m_settings(Settings())
+Texture2D::Texture2D() : m_textureID(0)
 {
-    m_textureID = generateTexture(width, height, data, m_settings);
 }
 
-Texture2D::Texture2D(unsigned int width, unsigned int height, unsigned char* data, const Settings& settings)
-    : m_width(width), m_height(height), m_settings(settings)
+void Texture2D::generate(unsigned int width, unsigned int height, unsigned char* data)
 {
-    m_textureID = generateTexture(width, height, data, settings);
+    m_textureID = createTexture(width, height, data, Settings());
+}
+
+void Texture2D::generate(unsigned int width, unsigned int height, unsigned char* data, const Settings& settings)
+{
+    m_textureID = createTexture(width, height, data, settings);
 }
 
 void Texture2D::bind() const
@@ -32,17 +34,12 @@ unsigned int Texture2D::getID() const
     return m_textureID;
 }
 
-const Texture2D::Settings& Texture2D::getSettings() const
+bool Texture2D::isValid() const
 {
-    return m_settings;
+    return m_textureID != 0;
 }
 
-glm::vec2 Texture2D::getSize()
-{
-    return glm::vec2(static_cast<float>(m_width), static_cast<float>(m_height));
-}
-
-unsigned int Texture2D::generateTexture(unsigned int width, unsigned int height, unsigned char* data, const Settings& settings) const
+unsigned int Texture2D::createTexture(unsigned int width, unsigned int height, unsigned char* data, const Settings& settings) const
 {
     unsigned int textureID;
     GL_CALL(glGenTextures(1, &textureID));

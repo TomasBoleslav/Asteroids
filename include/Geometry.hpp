@@ -1,16 +1,16 @@
 #ifndef GEOMETRY_HPP
 #define GEOMETRY_HPP
 
-/*
-Source for checking line intersection:
-https://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
-*/
-
 #include <glm/vec2.hpp>
 #include <glm/mat4x4.hpp>
 
 #include <vector>
 
+/**
+* Contains geometry functions and algorithms.
+* Source for checking intersection of line segments:
+* https://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
+*/
 namespace geom
 {
     static const glm::vec2 zeroVector = glm::vec2(0.0f);

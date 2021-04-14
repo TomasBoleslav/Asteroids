@@ -21,8 +21,8 @@ namespace rnd
     // Get float between two values.
     float getFloat(float value1, float value2);
 
-    // Get index from 0 to max
-    std::size_t getIndex(std::size_t max);
+    // Get integer from 0 to max.
+    int getInt(int max);
 
     // Choose one of two values.
     template<typename T>

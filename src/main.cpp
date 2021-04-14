@@ -14,7 +14,7 @@ int main()
     if (glfwInit() == GLFW_FALSE)
     {
         std::cerr << "Failed to initialize GLFW" << std::endl;
-        return -1;
+        return -2;
     }
     try
     {
@@ -24,12 +24,12 @@ int main()
     catch (const std::runtime_error& e)
     {
         std::cerr << "Runtime error:" << std::endl << e.what() << std::endl;
-        return -2;
+        return -3;
     }
     catch (const std::logic_error& e)
     {
         std::cerr << "Logic error:" << std::endl << e.what() << std::endl;
-        return -3;
+        return -4;
     }
     glfwTerminate();
     return 0;
