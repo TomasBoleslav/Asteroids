@@ -5,6 +5,10 @@
 
 #include <iostream>
 
+/**
+* Entry point of the game.
+* Initializes GLFW and runs the game.
+*/
 int main()
 {
     if (glfwInit() == GLFW_FALSE)

@@ -39,7 +39,7 @@ void Game::init()
     setCommonUniforms();
     m_renderer.init(ResourceManager::getShader("simple"));
     createPlayer();
-    random::setSeed(1);
+    rnd::setSeed(1);
 }
 
 void Game::createWindow()
@@ -258,10 +258,10 @@ void Game::createAsteroid()
     asteroid->texture = ResourceManager::getTexture("asteroid");
     asteroid->size = glm::vec2(ASTEROID_SIZE);
     asteroid->position = getAsteroidRandomPos(ASTEROID_SIZE);
-    asteroid->rotation = random::getFloat(0.0f, 360.0f);
-    asteroid->rotationSpeed = random::getFloat(ASTEROID_MIN_ROT_SPEED, ASTEROID_MAX_ROT_SPEED);
-    float speed = random::getFloat(ASTEROID_MIN_SPEED, ASTEROID_MAX_SPEED);
-    float velocityAngle = random::getIndex(3) * 90.0f + random::getFloat(ASTEROID_MIN_ANGLE, ASTEROID_MAX_ANGLE);
+    asteroid->rotation = rnd::getFloat(0.0f, 360.0f);
+    asteroid->rotationSpeed = rnd::getFloat(ASTEROID_MIN_ROT_SPEED, ASTEROID_MAX_ROT_SPEED);
+    float speed = rnd::getFloat(ASTEROID_MIN_SPEED, ASTEROID_MAX_SPEED);
+    float velocityAngle = rnd::getIndex(3) * 90.0f + rnd::getFloat(ASTEROID_MIN_ANGLE, ASTEROID_MAX_ANGLE);
     asteroid->velocity = speed * geom::getDirection(velocityAngle);
     asteroid->bounds = {
         glm::vec2(0.5f, 0.0f), glm::vec2(1.0f, 0.5f), glm::vec2(0.75f, 1.0f),
@@ -272,9 +272,9 @@ void Game::createAsteroid()
 
 glm::vec2 Game::getAsteroidRandomPos(float size)
 {
-    float randomX = random::getFloat(-size, SCR_WIDTH + size);
-    float randomY = random::getFloat(-size, SCR_HEIGHT + size);
-    return random::choose<glm::vec2>(
+    float randomX = rnd::getFloat(-size, SCR_WIDTH + size);
+    float randomY = rnd::getFloat(-size, SCR_HEIGHT + size);
+    return rnd::choose<glm::vec2>(
         glm::vec2(randomX, -size),  // top
         glm::vec2(-size, randomY)   // left
         );
