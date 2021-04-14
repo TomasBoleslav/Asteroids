@@ -8,7 +8,7 @@
 /**
 * Contains functions for easier random number generation.
 */
-namespace random 
+namespace rnd
 {
     // Set seed of random number generator.
     // This function should be called to initialize the random namespace.
@@ -21,8 +21,8 @@ namespace random
     // Get float between two values.
     float getFloat(float value1, float value2);
 
-    // Get array index from 0 to size - 1.
-    std::size_t getIndex(std::size_t size);
+    // Get index from 0 to max
+    std::size_t getIndex(std::size_t max);
 
     // Choose one of two values.
     template<typename T>
@@ -30,7 +30,7 @@ namespace random
 }
 
 template<typename T>
-T random::choose(T value1, T value2)
+T rnd::choose(T value1, T value2)
 {
     if (getFloat() <= 0.5f)
     {

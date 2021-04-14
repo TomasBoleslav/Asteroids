@@ -3,11 +3,11 @@
 #include <cstdlib>
 #include <ctime>
 
-void random::setSeed(unsigned int seed)
+void rnd::setSeed(unsigned int seed)
 {
 	if (seed == 0)
 	{
-		std::srand(std::time(0));
+		std::srand(static_cast<unsigned int>(std::time(0)));
 	}
 	else
 	{
@@ -15,17 +15,17 @@ void random::setSeed(unsigned int seed)
 	}
 }
 
-float random::getFloat()
+float rnd::getFloat()
 {
 	return static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
 }
 
-float random::getFloat(float value1, float value2)
+float rnd::getFloat(float value1, float value2)
 {
 	return value1 + getFloat() * (value2 - value1);
 }
 
-std::size_t random::getIndex(std::size_t max)
+std::size_t rnd::getIndex(std::size_t max)
 {
 	float randomFloat = getFloat();
 	if (randomFloat == 1.0f)
