@@ -11,7 +11,7 @@
 namespace rnd
 {
     // Set seed of random number generator.
-    // This function should be called to initialize the random namespace.
+    // This function should be called to initialize the 'rnd' namespace.
     // If the given seed is zero then the seed is set randomly.
     void setSeed(unsigned int seed);
 

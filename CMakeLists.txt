@@ -34,16 +34,13 @@ set(LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 
 # Executable definition and properties
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-target_include_directories(${PROJECT_NAME} PRIVATE "${INCLUDE_DIR}")
+target_include_directories(${PROJECT_NAME} PRIVATE ${SRC_DIR})
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
 
 # Copy resources
 add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy_directory
-	${CMAKE_SOURCE_DIR}/res/ ${BIN_DIR}/res/)
-
-# Disable console on Windows
-#set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/ENTRY:mainCRTStartup /SUBSYSTEM:WINDOWS")
+	"${CMAKE_SOURCE_DIR}/res/" "${BIN_DIR}/res/")
 
 # GLFW
 set(GLFW_DIR "${LIB_DIR}/glfw")
@@ -69,3 +66,7 @@ add_library("stb" "${STB_DIR}/src/stb_image.cpp")
 target_include_directories("stb" PRIVATE "${STB_DIR}/include")
 target_include_directories(${PROJECT_NAME} PRIVATE "${STB_DIR}/include")
 target_link_libraries(${PROJECT_NAME} "stb")
+
+# glm
+set(GLM_DIR "${INCLUDE_DIR}")
+target_include_directories(${PROJECT_NAME} PRIVATE ${GLM_DIR})
