@@ -116,20 +116,13 @@ void Game::gameLoop()
 
 void Game::determineState()
 {
-    switch (m_state)
+    if (m_state == GameState::Start && m_stateTimer.finished())
     {
-    case GameState::Start:
-        if (m_stateTimer.finished())
-        {
-            m_state = GameState::Running;
-        }
-        break;
-    case GameState::Over:
-        if (m_stateTimer.finished())
-        {
-            restartGame();
-        }
-        break;
+        m_state = GameState::Running;
+    }
+    else if (m_state == GameState::Over && m_stateTimer.finished())
+    {
+        restartGame();
     }
 }
 
