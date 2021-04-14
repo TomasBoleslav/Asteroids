@@ -11,6 +11,7 @@
 #include <memory>
 #include <vector>
 #include <cstdlib>
+#include <algorithm>
 
 /**
 * Space game controller.

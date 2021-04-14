@@ -14,7 +14,6 @@
 #include <glm/mat4x4.hpp>
 
 #include <stdexcept>
-#include <algorithm>
 
 Game::Game() : m_level(1), m_state(GameState::Running)
 {
