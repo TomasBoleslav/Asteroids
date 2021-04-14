@@ -105,9 +105,11 @@ void ResourceManager::clear()
 
 std::string ResourceManager::readFile(const std::string& path)
 {
-    std::ifstream file;
-    file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    file.open(path);
+    std::ifstream file(path);
+    if (!file)
+    {
+        throw std::ios_base::failure("Failed to read file '" + path + "'");
+    }
     std::stringstream sstream;
     sstream << file.rdbuf();
     file.close();

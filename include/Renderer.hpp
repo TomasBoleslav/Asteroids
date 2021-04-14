@@ -20,7 +20,6 @@ class Renderer final
 {
 public:
     Renderer();
-    ~Renderer();
 
     // Initialize the renderer and set a shader for drawing.
     void init(const Shader& shader);

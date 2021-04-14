@@ -14,11 +14,6 @@ Renderer::Renderer() : m_quadVAO(0)
 {
 }
 
-Renderer::~Renderer()
-{
-    GL_CALL(glDeleteVertexArrays(1, &m_quadVAO));
-}
-
 void Renderer::init(const Shader& shader)
 {
     m_shader = shader;
