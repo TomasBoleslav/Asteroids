@@ -44,7 +44,7 @@ void Player::update(float deltaTime)
     m_userForce = 0.0f;
 }
 
-bool Player::canShoot()
+bool Player::canShoot() const
 {
     return m_reloadTimer.finished();
 }
@@ -66,7 +66,7 @@ std::shared_ptr<Bullet> Player::shoot(glm::vec2 bulletSize, float speed, double 
     return bullet;
 }
 
-glm::vec2 Player::getBulletPosition(glm::vec2 bulletSize)
+glm::vec2 Player::getBulletPosition(glm::vec2 bulletSize) const
 {
     glm::vec2 normalizedBowPos = glm::vec2(0.5f, 0.0f);
     glm::mat4 playerModel = geom::getModelMatrix(position, size, rotation);

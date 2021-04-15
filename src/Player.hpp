@@ -28,7 +28,7 @@ public:
     virtual void update(float deltaTime) override;
 
     // Check if reload time is up.
-    bool canShoot();
+    bool canShoot() const;
 
     // Shoot a bullet in the direction of player.
     std::shared_ptr<Bullet> shoot(glm::vec2 bulletSize, float speed, double lifetime);
@@ -38,7 +38,7 @@ private:
     float m_angularVelocity;    // Angular velocity that was read from input.
     float m_userForce;          // Force that was read from input.
 
-    glm::vec2 getBulletPosition(glm::vec2 bulletSize);
+    glm::vec2 getBulletPosition(glm::vec2 bulletSize) const;
 };
 
 #endif
