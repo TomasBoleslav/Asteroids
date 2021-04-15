@@ -8,6 +8,8 @@ Program je napsaný v jazyce C++ s použitím [GLFW](https://www.glfw.org/) a [g
 
 Jako systém pro sestavení byl použit [cmake](https://cmake.org/), který můžete použít pro kompilaci programu. Je potřeba mít k dispozici OpenGL verze alespoň 3.3 a případně některé závislosti knihovny GLFW. Více informací na [webu GLFW o kompilaci](https://www.glfw.org/docs/latest/compile.html).
 
+Hra se po sestavení skládá ze spustitelného programu `SpaceGame` (případně `SpaceGame.exe`) a adresáře `res/`, který obsahuje další zdroje a musí být ponechán ve stejném adresáři jako `SpaceGame`, jinak program nebude fungovat.
+
 ### Linux
 
 Pro Linux byl vytvořen skript `build.sh`, který s využitím `cmake` a `make` program zkompiluje do adresáře `./build/bin/`.
