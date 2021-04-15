@@ -94,15 +94,15 @@ private:
     void handleCollisions();
     void handleStrayObjects();
     void rolloverObject(const std::shared_ptr<GameObject>& gameObject); // "Rollover" the object to the other side of screen
-    void render();
-    void renderLevelCount();
+    void render() const;
+    void renderLevelCount() const;
 
     // State change
     void gameOver();
     void increaseLevel();       // Increase level and spawn new asteroids
     void spawnAsteroids();      // Spawn asteroids according to current level
     void createAsteroid();      // Create a new asteroid and places it randomly outside the screen
-    glm::vec2 getAsteroidRandomPos(float size); // Get a random position of an asteroid to be created
+    glm::vec2 getAsteroidRandomPos(float size) const; // Get a random position of an asteroid to be created
 
     // Remove all objects from vector satisfying the given condition.
     template<typename T, typename F>

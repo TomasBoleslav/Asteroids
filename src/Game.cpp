@@ -231,7 +231,7 @@ void Game::rolloverObject(const std::shared_ptr<GameObject>& gameObject)
     gameObject->position = pos;
 }
 
-void Game::render()
+void Game::render() const
 {
     GL_CALL(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
     GL_CALL(glClear(GL_COLOR_BUFFER_BIT));
@@ -253,7 +253,7 @@ void Game::render()
     m_window->swapBuffers();
 }
 
-void Game::renderLevelCount()
+void Game::renderLevelCount() const
 {
     const Texture2D& texture = ResourceManager::getTexture("ship");
     glm::vec2 pos = glm::vec2(0.0f);
@@ -311,7 +311,7 @@ void Game::createAsteroid()
     m_asteroids.push_back(asteroid);
 }
 
-glm::vec2 Game::getAsteroidRandomPos(float size)
+glm::vec2 Game::getAsteroidRandomPos(float size) const
 {
     float randomX = rnd::getFloat(-size, SCR_WIDTH + size);
     float randomY = rnd::getFloat(-size, SCR_HEIGHT + size);
