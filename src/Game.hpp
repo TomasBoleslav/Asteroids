@@ -22,7 +22,7 @@ public:
     Game();
     ~Game();
 
-    // Initializes the game and starts the game loop.
+    // Initialize the game and start the game loop.
     void run();
 
 private:
@@ -53,7 +53,7 @@ private:
     const glm::vec2 PLAYER_SIZE = glm::vec2(28.0f, 35.0f);
     const float PLAYER_FORCE = 400.0f;
     const float PLAYER_DECAY = 0.99f;
-    const float PLAYER_TURN_SPEED = 250.0f;
+    const float PLAYER_TURN_SPEED = 225.0f;
     const float PLAYER_RELOAD_TIME = 0.3f;
 
     // Bullet constants
@@ -80,31 +80,29 @@ private:
     // Initialization
     void init();
     void createWindow();
-    void loadResources();
-    void setCommonUniforms();
+    void loadResources() const;
+    void setCommonUniforms() const;
     void createPlayer();
-    void restartGame();
+    void restartGame();             // Set the game to the state of level one
 
     // Game loop
     void gameLoop();
-    void determineState();          // Determines the next state using m_stateTimer
+    void determineState();          // Determines the next state of the game using m_stateTimer
     void processInput();
     void shootBullet();
     void update(float deltaTime);
-    void render();
-    void renderLevelCount();
-
-    // Update of objects
     void handleCollisions();
     void handleStrayObjects();
-    void moveObjectBack(const std::shared_ptr<GameObject>& gameObject); // Moves a stray object to the other side of screen
+    void rolloverObject(const std::shared_ptr<GameObject>& gameObject); // "Rollover" the object to the other side of screen
+    void render();
+    void renderLevelCount();
 
     // State change
     void gameOver();
     void increaseLevel();       // Increase level and spawn new asteroids
-    void spawnAsteroids();      // Spawns asteroids according to current level
-    void createAsteroid();      // Creates a new asteroid and places it randomly outside the screen
-    glm::vec2 getAsteroidRandomPos(float size);
+    void spawnAsteroids();      // Spawn asteroids according to current level
+    void createAsteroid();      // Create a new asteroid and places it randomly outside the screen
+    glm::vec2 getAsteroidRandomPos(float size); // Get a random position of an asteroid to be created
 
     // Remove all objects from vector satisfying the given condition.
     template<typename T, typename F>

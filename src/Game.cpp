@@ -53,7 +53,7 @@ void Game::createWindow()
     m_window = std::make_unique<Window>(SCR_WIDTH, SCR_HEIGHT, "SpaceGame");
 }
 
-void Game::loadResources()
+void Game::loadResources() const
 {
     ResourceManager::loadShader("simple", "res/shaders/simple.vert", "res/shaders/simple.frag");
     ResourceManager::loadTexture("ship", "res/images/ship.png", true);
@@ -61,7 +61,7 @@ void Game::loadResources()
     ResourceManager::loadTexture("background", "res/images/background.png", true);
 }
 
-void Game::setCommonUniforms()
+void Game::setCommonUniforms() const
 {
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(SCR_WIDTH), static_cast<float>(SCR_HEIGHT), 0.0f, -1.0f, 1.0f);
     ResourceManager::getShader("simple").use();
@@ -169,6 +169,68 @@ void Game::update(float deltaTime)
     handleStrayObjects();
 }
 
+void Game::handleCollisions()
+{
+    removeObjectsIf(m_asteroids,
+        [this](const std::shared_ptr<Asteroid>& asteroid)
+        {
+            for (auto it = m_bullets.begin(); it != m_bullets.end(); ++it)
+            {
+                if ((*it)->collidesWith(asteroid))
+                {
+                    m_bullets.erase(it);
+                    return true;
+                }
+            }
+            return false;
+        }
+    );
+    for (auto&& asteroid : m_asteroids)
+    {
+        if (m_player->collidesWith(asteroid))
+        {
+            gameOver();
+        }
+    }
+}
+
+void Game::handleStrayObjects()
+{
+    removeObjectsIf(m_bullets, [](const std::shared_ptr<Bullet>& bullet) { return bullet->isDestroyed(); });
+    for (auto&& bullet : m_bullets)
+    {
+        rolloverObject(bullet);
+    }
+    for (auto&& asteroid : m_asteroids)
+    {
+        rolloverObject(asteroid);
+    }
+    rolloverObject(m_player);
+}
+
+void Game::rolloverObject(const std::shared_ptr<GameObject>& gameObject)
+{
+    glm::vec2 pos = gameObject->position;
+    glm::vec2 size = gameObject->size;
+    if (pos.x < -size.x)
+    {
+        pos.x = SCR_SIZE.x;
+    }
+    else if (pos.x > SCR_SIZE.x)
+    {
+        pos.x = -size.x;
+    }
+    if (pos.y < -size.y)
+    {
+        pos.y = SCR_SIZE.y;
+    }
+    else if (pos.y > SCR_HEIGHT)
+    {
+        pos.y = -size.y;
+    }
+    gameObject->position = pos;
+}
+
 void Game::render()
 {
     GL_CALL(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
@@ -208,68 +270,6 @@ void Game::renderLevelCount()
         }
         m_renderer.drawQuad(texture, pos, LEVEL_ICON_SIZE, 0.0f, LEVEL_ICON_COLOR);
     }
-}
-
-void Game::handleCollisions()
-{
-    removeObjectsIf(m_asteroids,
-        [this](const std::shared_ptr<Asteroid>& asteroid)
-        {
-            for (auto it = m_bullets.begin(); it != m_bullets.end(); ++it)
-            {
-                if ((*it)->collidesWith(asteroid))
-                {
-                    m_bullets.erase(it);
-                    return true;
-                }
-            }
-            return false;
-        }
-    );
-    for (auto&& asteroid : m_asteroids)
-    {
-        if (m_player->collidesWith(asteroid))
-        {
-            gameOver();
-        }
-    }
-}
-
-void Game::handleStrayObjects()
-{
-    removeObjectsIf(m_bullets, [](const std::shared_ptr<Bullet>& bullet) { return bullet->isDestroyed(); });
-    for (auto&& bullet : m_bullets)
-    {
-        moveObjectBack(bullet);
-    }
-    for (auto&& asteroid : m_asteroids)
-    {
-        moveObjectBack(asteroid);
-    }
-    moveObjectBack(m_player);
-}
-
-void Game::moveObjectBack(const std::shared_ptr<GameObject>& gameObject)
-{
-    glm::vec2 pos = gameObject->position;
-    glm::vec2 size = gameObject->size;
-    if (pos.x < -size.x)
-    {
-        pos.x = SCR_SIZE.x;
-    }
-    else if (pos.x > SCR_SIZE.x)
-    {
-        pos.x = -size.x;
-    }
-    if (pos.y < -size.y)
-    {
-        pos.y = SCR_SIZE.y;
-    }
-    else if (pos.y > SCR_HEIGHT)
-    {
-        pos.y = -size.y;
-    }
-    gameObject->position = pos;
 }
 
 void Game::gameOver()
