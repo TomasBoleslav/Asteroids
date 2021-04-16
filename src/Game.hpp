@@ -20,6 +20,9 @@ class Game final
 {
 public:
     Game();
+    Game(const Game&) = delete;
+    Game& operator=(const Game&) = delete;
+
     ~Game();
 
     // Initialize the game and start the game loop.
