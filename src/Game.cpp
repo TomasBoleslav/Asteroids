@@ -207,7 +207,7 @@ void Game::createRemnants(const Asteroid& asteroid)
         remnant.position = asteroid.getRemnantOrigin();
         remnant.size = REMNANT_SIZE;
         remnant.setLifetime(REMNANT_LIFETIME);
-        float speed = rnd::getFloat(REMNANT_MIN_SPEED, REMNANT_MIN_SPEED);
+        float speed = rnd::getFloat(REMNANT_MIN_SPEED, REMNANT_MAX_SPEED);
         float velocityAngle = rnd::getFloat(0.0f, 360.0f);
         remnant.velocity = speed * geom::getDirection(velocityAngle);
         m_remnants.push_back(remnant);

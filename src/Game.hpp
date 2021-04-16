@@ -76,8 +76,8 @@ private:
     const std::size_t REMNANT_COUNT = 10;
     const glm::vec2 REMNANT_SIZE = glm::vec2(3.0f);
     const float REMNANT_LIFETIME = 0.5f;
-    const float REMNANT_MIN_SPEED = 50.0f;
-    const float REMNANT_MAX_SPEED = 100.0f;
+    const float REMNANT_MIN_SPEED = 40.0f;
+    const float REMNANT_MAX_SPEED = 80.0f;
 
     std::unique_ptr<Window> m_window;
     std::size_t m_level;    // Current level
