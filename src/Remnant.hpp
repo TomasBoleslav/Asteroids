@@ -13,11 +13,10 @@ class Remnant : public GameObject
 {
 public:
     glm::vec2 velocity;
-    float rotationSpeed;    // Rotation speed in degrees per second.
 
     Remnant();
 
-    // Move and change the color of the remant.
+    // Move the remant.
     void update(float deltaTime) override;
 
     // Set the duration for which the remnant will exist.

@@ -90,6 +90,7 @@ void Game::restartGame()
     m_player.rotation = 0.0f;
     m_asteroids.clear();
     m_bullets.clear();
+    m_remnants.clear();
     spawnAsteroids();
     m_state = GameState::Start;
     m_stateTimer.start(TIME_BETWEEN_STATES);
@@ -204,9 +205,7 @@ void Game::createRemnants(const Asteroid& asteroid)
     {
         Remnant remnant;
         remnant.position = asteroid.getRemnantOrigin();
-        remnant.rotation = rnd::getFloat(0.0f, 360.0f);
         remnant.size = REMNANT_SIZE;
-        remnant.rotationSpeed = rnd::getFloat(ASTEROID_MIN_ROT_SPEED, ASTEROID_MAX_ROT_SPEED);
         remnant.setLifetime(REMNANT_LIFETIME);
         float speed = rnd::getFloat(REMNANT_MIN_SPEED, REMNANT_MIN_SPEED);
         float velocityAngle = rnd::getFloat(0.0f, 360.0f);

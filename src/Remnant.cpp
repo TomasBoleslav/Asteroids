@@ -2,14 +2,12 @@
 
 #include "Geometry.hpp"
 
-Remnant::Remnant() : velocity(0.0f), rotationSpeed(0.0f)
+Remnant::Remnant() : velocity(0.0f)
 {
 }
 
 void Remnant::update(float deltaTime)
 {
-    rotation += rotationSpeed * deltaTime;
-    rotation = geom::clampAngle(rotation);
     position += velocity * deltaTime;
 }
 
