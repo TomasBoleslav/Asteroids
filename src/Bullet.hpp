@@ -24,7 +24,6 @@ public:
     bool isDestroyed() const;
 
 private:
-    float m_distanceLeft;
     Timer m_lifeTimer;
 };
 

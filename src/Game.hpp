@@ -7,6 +7,7 @@
 #include "GameObject.hpp"
 #include "Player.hpp"
 #include "Asteroid.hpp"
+#include "Remnant.hpp"
 
 #include <memory>
 #include <vector>
@@ -71,6 +72,13 @@ private:
     const float LEVEL_ICON_OFFSET = 20.0f;
     const std::size_t LEVEL_ICONS_IN_ROW = 5;
 
+    // Remnant constants
+    const std::size_t REMNANT_COUNT = 10;
+    const glm::vec2 REMNANT_SIZE = glm::vec2(3.0f);
+    const float REMNANT_LIFETIME = 0.5f;
+    const float REMNANT_MIN_SPEED = 50.0f;
+    const float REMNANT_MAX_SPEED = 100.0f;
+
     std::unique_ptr<Window> m_window;
     std::size_t m_level;    // Current level
     GameState m_state;      // Current state
@@ -79,6 +87,7 @@ private:
     Player m_player;
     std::vector<Asteroid> m_asteroids;
     std::vector<Bullet> m_bullets;
+    std::vector<Remnant> m_remnants;
 
     // Initialization
     void init();
@@ -95,6 +104,7 @@ private:
     void shootBullet();
     void update(float deltaTime);
     void handleCollisions();
+    void createRemnants(const Asteroid& asteroid);
     void handleStrayObjects();
     void rolloverObject(GameObject& gameObject); // "Rollover" the object to the other side of screen
     void render() const;

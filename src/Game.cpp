@@ -165,6 +165,10 @@ void Game::update(float deltaTime)
     {
         bullet.update(deltaTime);
     }
+    for (auto&& remnant : m_remnants)
+    {
+        remnant.update(deltaTime);
+    }
     handleStrayObjects();
 }
 
@@ -177,6 +181,7 @@ void Game::handleCollisions()
             {
                 if (it->collidesWith(asteroid))
                 {
+                    createRemnants(asteroid);
                     m_bullets.erase(it);
                     return true;
                 }
@@ -193,9 +198,27 @@ void Game::handleCollisions()
     }
 }
 
+void Game::createRemnants(const Asteroid& asteroid)
+{
+    for (size_t i = 0; i < REMNANT_COUNT; i++)
+    {
+        Remnant remnant;
+        remnant.position = asteroid.getRemnantOrigin();
+        remnant.rotation = rnd::getFloat(0.0f, 360.0f);
+        remnant.size = REMNANT_SIZE;
+        remnant.rotationSpeed = rnd::getFloat(ASTEROID_MIN_ROT_SPEED, ASTEROID_MAX_ROT_SPEED);
+        remnant.setLifetime(REMNANT_LIFETIME);
+        float speed = rnd::getFloat(REMNANT_MIN_SPEED, REMNANT_MIN_SPEED);
+        float velocityAngle = rnd::getFloat(0.0f, 360.0f);
+        remnant.velocity = speed * geom::getDirection(velocityAngle);
+        m_remnants.push_back(remnant);
+    }
+}
+
 void Game::handleStrayObjects()
 {
     removeObjectsIf(m_bullets, [](const Bullet& bullet) { return bullet.isDestroyed(); });
+    removeObjectsIf(m_remnants, [](const Remnant& remnant) { return remnant.isDestroyed(); });
     for (auto&& bullet : m_bullets)
     {
         rolloverObject(bullet);
@@ -203,6 +226,10 @@ void Game::handleStrayObjects()
     for (auto&& asteroid : m_asteroids)
     {
         rolloverObject(asteroid);
+    }
+    for (auto&& remnant : m_remnants)
+    {
+        rolloverObject(remnant);
     }
     rolloverObject(m_player);
 }
@@ -247,6 +274,10 @@ void Game::render() const
     for (auto&& bullet : m_bullets)
     {
         bullet.draw(m_renderer);
+    }
+    for (auto&& remnant : m_remnants)
+    {
+        remnant.draw(m_renderer);
     }
     renderLevelCount();
     m_window->swapBuffers();

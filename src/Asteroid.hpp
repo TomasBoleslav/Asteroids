@@ -2,6 +2,7 @@
 #define ASTEROID_HPP
 
 #include "GameObject.hpp"
+#include "Remnant.hpp"
 
 #include <glm/vec2.hpp>
 
@@ -18,6 +19,9 @@ public:
 
     // Move the asteroid.
     void update(float deltaTime) override;
+
+    // Get the point where asteroid remnants will originate from
+    glm::vec2 getRemnantOrigin() const;
 };
 
 #endif

@@ -2,7 +2,7 @@
 
 #include <glm/vec2.hpp>
 
-Bullet::Bullet() : velocity(0.0f), m_distanceLeft(0.0f)
+Bullet::Bullet() : velocity(0.0f)
 {
 }
 
