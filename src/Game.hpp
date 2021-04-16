@@ -73,9 +73,9 @@ private:
     GameState m_state;      // Current state
     Timer m_stateTimer;     // Timer for delay between states
     Renderer m_renderer;
-    std::shared_ptr<Player> m_player;
-    std::vector<std::shared_ptr<Asteroid>> m_asteroids;
-    std::vector<std::shared_ptr<Bullet>> m_bullets;
+    Player m_player;
+    std::vector<Asteroid> m_asteroids;
+    std::vector<Bullet> m_bullets;
 
     // Initialization
     void init();
@@ -93,7 +93,7 @@ private:
     void update(float deltaTime);
     void handleCollisions();
     void handleStrayObjects();
-    void rolloverObject(const std::shared_ptr<GameObject>& gameObject); // "Rollover" the object to the other side of screen
+    void rolloverObject(GameObject& gameObject); // "Rollover" the object to the other side of screen
     void render() const;
     void renderLevelCount() const;
 
@@ -106,11 +106,11 @@ private:
 
     // Remove all objects from vector satisfying the given condition.
     template<typename T, typename F>
-    void removeObjectsIf(std::vector<std::shared_ptr<T>>& objects, F function);
+    void removeObjectsIf(std::vector<T>& objects, F function);
 };
 
 template<typename T, typename F>
-void Game::removeObjectsIf(std::vector<std::shared_ptr<T>>& objects, F function)
+void Game::removeObjectsIf(std::vector<T>& objects, F function)
 {
     objects.erase(std::remove_if(objects.begin(), objects.end(), function), objects.end());
 }

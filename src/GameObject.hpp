@@ -28,7 +28,7 @@ public:
     GameObject();
     virtual ~GameObject();
     void draw(const Renderer& renderer) const;
-    bool collidesWith(const std::shared_ptr<GameObject>& other) const;
+    bool collidesWith(const GameObject& other) const;
 
     // Updates the game object in real time.
     virtual void update(float deltaTime) = 0;

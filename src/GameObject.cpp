@@ -20,10 +20,10 @@ void GameObject::draw(const Renderer& renderer) const
     renderer.drawQuad(texture, position, size, rotation, color);
 }
 
-bool GameObject::collidesWith(const std::shared_ptr<GameObject>& other) const
+bool GameObject::collidesWith(const GameObject& other) const
 {
     auto bounds1 = applyModelOnBounds();
-    auto bounds2 = other->applyModelOnBounds();
+    auto bounds2 = other.applyModelOnBounds();
     return geom::polygonsIntersect(bounds1, bounds2);
 }
 

@@ -31,7 +31,7 @@ public:
     bool canShoot() const;
 
     // Shoot a bullet in the direction of player.
-    std::shared_ptr<Bullet> shoot(glm::vec2 bulletSize, float speed, double lifetime);
+    Bullet shoot(glm::vec2 bulletSize, float speed, double lifetime);
 
 private:
     Timer m_reloadTimer;

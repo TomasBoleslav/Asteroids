@@ -70,14 +70,13 @@ void Game::setCommonUniforms() const
 
 void Game::createPlayer()
 {
-    m_player = std::make_shared<Player>();
-    m_player->texture = ResourceManager::getTexture("ship");
-    m_player->size = PLAYER_SIZE;
-    m_player->reloadTime = PLAYER_RELOAD_TIME;
-    m_player->force = PLAYER_FORCE;
-    m_player->decay = PLAYER_DECAY;
-    m_player->turnSpeed = PLAYER_TURN_SPEED;
-    m_player->bounds = {
+    m_player.texture = ResourceManager::getTexture("ship");
+    m_player.size = PLAYER_SIZE;
+    m_player.reloadTime = PLAYER_RELOAD_TIME;
+    m_player.force = PLAYER_FORCE;
+    m_player.decay = PLAYER_DECAY;
+    m_player.turnSpeed = PLAYER_TURN_SPEED;
+    m_player.bounds = {
         glm::vec2(0.0f, 1.0f), glm::vec2(0.5f, 0.75f),
         glm::vec2(1.0f, 1.0f), glm::vec2(0.5f, 0.0f)
     };
@@ -86,9 +85,9 @@ void Game::createPlayer()
 void Game::restartGame()
 {
     m_level = 1;
-    m_player->position = SCR_CENTER;
-    m_player->velocity = glm::vec2(0.0f);
-    m_player->rotation = 0.0f;
+    m_player.position = SCR_CENTER;
+    m_player.velocity = glm::vec2(0.0f);
+    m_player.rotation = 0.0f;
     m_asteroids.clear();
     m_bullets.clear();
     spawnAsteroids();
@@ -133,16 +132,16 @@ void Game::processInput()
         m_window->setToClose();
         return;
     }
-    if (Input::isKeyPressed(GLFW_KEY_SPACE) && m_state == GameState::Running && m_player->canShoot())
+    if (Input::isKeyPressed(GLFW_KEY_SPACE) && m_state == GameState::Running && m_player.canShoot())
     {
         shootBullet();
     }
-    m_player->processInput();
+    m_player.processInput();
 }
 
 void Game::shootBullet()
 {
-    auto bullet = m_player->shoot(BULLET_SIZE, BULLET_SPEED, BULLET_LIFETIME);
+    Bullet bullet = m_player.shoot(BULLET_SIZE, BULLET_SPEED, BULLET_LIFETIME);
     m_bullets.push_back(bullet);
 }
 
@@ -157,14 +156,14 @@ void Game::update(float deltaTime)
     {
         increaseLevel();
     }
-    m_player->update(deltaTime);
+    m_player.update(deltaTime);
     for (auto&& asteroid : m_asteroids)
     {
-        asteroid->update(deltaTime);
+        asteroid.update(deltaTime);
     }
     for (auto&& bullet : m_bullets)
     {
-        bullet->update(deltaTime);
+        bullet.update(deltaTime);
     }
     handleStrayObjects();
 }
@@ -172,11 +171,11 @@ void Game::update(float deltaTime)
 void Game::handleCollisions()
 {
     removeObjectsIf(m_asteroids,
-        [this](const std::shared_ptr<Asteroid>& asteroid)
+        [this](const Asteroid& asteroid)
         {
             for (auto it = m_bullets.begin(); it != m_bullets.end(); ++it)
             {
-                if ((*it)->collidesWith(asteroid))
+                if (it->collidesWith(asteroid))
                 {
                     m_bullets.erase(it);
                     return true;
@@ -187,7 +186,7 @@ void Game::handleCollisions()
     );
     for (auto&& asteroid : m_asteroids)
     {
-        if (m_player->collidesWith(asteroid))
+        if (m_player.collidesWith(asteroid))
         {
             gameOver();
         }
@@ -196,7 +195,7 @@ void Game::handleCollisions()
 
 void Game::handleStrayObjects()
 {
-    removeObjectsIf(m_bullets, [](const std::shared_ptr<Bullet>& bullet) { return bullet->isDestroyed(); });
+    removeObjectsIf(m_bullets, [](const Bullet& bullet) { return bullet.isDestroyed(); });
     for (auto&& bullet : m_bullets)
     {
         rolloverObject(bullet);
@@ -208,10 +207,10 @@ void Game::handleStrayObjects()
     rolloverObject(m_player);
 }
 
-void Game::rolloverObject(const std::shared_ptr<GameObject>& gameObject)
+void Game::rolloverObject(GameObject& gameObject)
 {
-    glm::vec2 pos = gameObject->position;
-    glm::vec2 size = gameObject->size;
+    glm::vec2 pos = gameObject.position;
+    glm::vec2 size = gameObject.size;
     if (pos.x < -size.x)
     {
         pos.x = SCR_SIZE.x;
@@ -228,7 +227,7 @@ void Game::rolloverObject(const std::shared_ptr<GameObject>& gameObject)
     {
         pos.y = -size.y;
     }
-    gameObject->position = pos;
+    gameObject.position = pos;
 }
 
 void Game::render() const
@@ -239,15 +238,15 @@ void Game::render() const
     m_renderer.drawQuad(background, glm::vec2(0.0f), glm::vec2(SCR_WIDTH, SCR_HEIGHT));
     if (m_state != GameState::Over)
     {
-        m_player->draw(m_renderer);
+        m_player.draw(m_renderer);
     }
     for (auto&& asteroid : m_asteroids)
     {
-        asteroid->draw(m_renderer);
+        asteroid.draw(m_renderer);
     }
     for (auto&& bullet : m_bullets)
     {
-        bullet->draw(m_renderer);
+        bullet.draw(m_renderer);
     }
     renderLevelCount();
     m_window->swapBuffers();
@@ -295,16 +294,16 @@ void Game::spawnAsteroids()
 
 void Game::createAsteroid()
 {
-    auto asteroid = std::make_shared<Asteroid>();
-    asteroid->texture = ResourceManager::getTexture("asteroid");
-    asteroid->size = glm::vec2(ASTEROID_SIZE);
-    asteroid->position = getAsteroidRandomPos(ASTEROID_SIZE);
-    asteroid->rotation = rnd::getFloat(0.0f, 360.0f);
-    asteroid->rotationSpeed = rnd::getFloat(ASTEROID_MIN_ROT_SPEED, ASTEROID_MAX_ROT_SPEED);
+    Asteroid asteroid;
+    asteroid.texture = ResourceManager::getTexture("asteroid");
+    asteroid.size = glm::vec2(ASTEROID_SIZE);
+    asteroid.position = getAsteroidRandomPos(ASTEROID_SIZE);
+    asteroid.rotation = rnd::getFloat(0.0f, 360.0f);
+    asteroid.rotationSpeed = rnd::getFloat(ASTEROID_MIN_ROT_SPEED, ASTEROID_MAX_ROT_SPEED);
     float speed = rnd::getFloat(ASTEROID_MIN_SPEED, ASTEROID_MAX_SPEED);
     float velocityAngle = rnd::getInt(3) * 90.0f + rnd::getFloat(ASTEROID_MIN_ANGLE, ASTEROID_MAX_ANGLE);
-    asteroid->velocity = speed * geom::getDirection(velocityAngle);
-    asteroid->bounds = {
+    asteroid.velocity = speed * geom::getDirection(velocityAngle);
+    asteroid.bounds = {
         glm::vec2(0.5f, 0.0f), glm::vec2(1.0f, 0.5f), glm::vec2(0.75f, 1.0f),
         glm::vec2(0.25f, 1.0f), glm::vec2(0.0f, 0.75f), glm::vec2(0.15f, 0.25f)
     };

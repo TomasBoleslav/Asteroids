@@ -49,16 +49,16 @@ bool Player::canShoot() const
     return m_reloadTimer.finished();
 }
 
-std::shared_ptr<Bullet> Player::shoot(glm::vec2 bulletSize, float speed, double lifetime)
+Bullet Player::shoot(glm::vec2 bulletSize, float speed, double lifetime)
 {
-    auto bullet = std::make_shared<Bullet>();
-    bullet->position = getBulletPosition(bulletSize);
+    Bullet bullet;
+    bullet.position = getBulletPosition(bulletSize);
     glm::vec2 bulletDir = geom::getDirection(rotation - 90.0f);
-    bullet->velocity = (speed + glm::length(velocity)) * bulletDir;
-    bullet->size = bulletSize;
-    bullet->rotation = rotation;
-    bullet->setLifetime(lifetime);
-    bullet->bounds = {
+    bullet.velocity = (speed + glm::length(velocity)) * bulletDir;
+    bullet.size = bulletSize;
+    bullet.rotation = rotation;
+    bullet.setLifetime(lifetime);
+    bullet.bounds = {
         glm::vec2(0.0f, 0.0f), glm::vec2(1.0f, 0.0f),
         glm::vec2(1.0f, 1.0f), glm::vec2(0.0f, 1.0f)
     };
